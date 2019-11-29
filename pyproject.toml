@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "pyklopp"
+version = "0.1.0"
+description = ""
+authors = [
+    "Julian Stier <julian.stier@uni-passau.de>"
+]
+license = "MIT"
+
+readme = "README.md"
+
+homepage = "https://github.com/innvariant/pyklopp"
+repository = "https://github.com/innvariant/pyklopp"
+documentation = "https://github.com/innvariant/pyklopp"
+
+keywords = ["machine learning", "inference", "training"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+cleo = "^0.7.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry.scripts]
+poetry = "pyklopp.console:main"
