@@ -18,13 +18,14 @@ keywords = ["machine learning", "inference", "training"]
 [tool.poetry.dependencies]
 python = "^3.7"
 cleo = "^0.7.6"
+torch = "^1.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
 
+[tool.poetry.scripts]
+pyklopp = "pyklopp.console:main"
+
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
-
-[tool.poetry.scripts]
-poetry = "pyklopp.console:main"

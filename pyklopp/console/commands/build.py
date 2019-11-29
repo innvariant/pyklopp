@@ -1,7 +1,4 @@
-import pypaddle.sparse
-
 from cleo import Command
-from pyklopp.initializer import Norm001Initializer
 
 
 class BuildCommand(Command):
@@ -32,16 +29,11 @@ class BuildCommand(Command):
         self.line('\tShape: %s' % str(shape))
         self.line('\tInit: %s' % init)
 
+"""
     @property
     def available_initializers(self):  # type: () -> dict
         inits = [
             Norm001Initializer()
         ]
         return {str(i): i for i in inits}
-
-    @property
-    def available_models(self):  # type: () -> dict
-        return {
-            'MaskedDeepFFN': pypaddle.sparse.MaskedDeepFFN,
-            'MaskedDeepDAN': pypaddle.sparse.MaskedDeepDAN
-        }
+"""

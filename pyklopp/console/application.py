@@ -1,8 +1,7 @@
 from pyklopp import __version__
-
 from cleo import Application as BaseApplication
 
-from .commands.build import BuildCommand
+from .commands.init import InitCommand
 
 
 class Application(BaseApplication):
@@ -16,7 +15,7 @@ class Application(BaseApplication):
 
     def get_default_commands(self):  # type: () -> list
         commands = [
-            BuildCommand()
+            InitCommand()
         ]
 
         return commands

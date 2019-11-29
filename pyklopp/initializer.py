@@ -1,5 +1,4 @@
 import torch
-import pypaddle.sparse
 
 
 class Initializer(object):
