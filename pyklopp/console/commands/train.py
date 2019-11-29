@@ -18,8 +18,8 @@ class TrainCommand(Command):
     Trains a model
 
     train
-        {dataset : Data set module for training}
         {model : Path to the pytorch model file}
+        {dataset : Data set module for training}
         {--c|config=* : Configuration JSON string or file path.}
         {--s|save : Path (including name) to save the model to}
     """
