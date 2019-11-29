@@ -28,10 +28,13 @@ class InitCommand(Command):
             save_path = str(self.option('save'))
             model_file_name = os.path.basename(save_path)
             save_path_base = os.path.dirname(save_path)
+            if len(save_path_base) < 1:
+                raise ValueError('You did not specify a path with "%s"' % save_path)
             if os.path.exists(save_path_base):
                 raise ValueError('Path "%s" already exists' % save_path_base)
 
             os.makedirs(save_path_base)
+
 
         module_name = self.argument('module')
 
@@ -45,9 +48,9 @@ class InitCommand(Command):
         self.info('Added %s to path' % add_path)
 
         try:
-            module = __import__('.' + module_name, fromlist=[''])
+            module = __import__(module_name, fromlist=[''])
         except ModuleNotFoundError:
-            raise ModuleNotFoundError('didnt work out for module name "' + module_name + '"')
+            raise ModuleNotFoundError('Could not import module "' + module_name + '"')
 
         try:
             fn_init = module.init
