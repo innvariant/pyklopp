@@ -21,7 +21,7 @@ class TrainCommand(Command):
         {model : Path to the pytorch model file}
         {dataset : Data set module for training}
         {--c|config=* : Configuration JSON string or file path.}
-        {--s|save : Path (including name) to save the model to}
+        {--s|save= : Path (including name) to save the model to}
     """
 
     def handle(self):
