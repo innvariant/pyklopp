@@ -8,6 +8,7 @@ import torch.nn
 
 from cleo import Command
 from pyklopp import __version__
+from pyklopp import subpackage_import
 
 
 class InitCommand(Command):
@@ -15,7 +16,8 @@ class InitCommand(Command):
     Initializes a model from a given module
 
     init
-        {module : Name of the module with initialization method for the model.}
+        {model : Name of the module with initialization method for the model.}
+        {--m|modules=* : Optional modules to load.}
         {--c|config=* : JSON config or path to JSON config file.}
         {--s|save= : Path to save the model/config to}
     """
@@ -35,29 +37,31 @@ class InitCommand(Command):
 
             os.makedirs(save_path_base)
 
-        module_name = self.argument('module')
-        # For bash-completion, also allow the module name to end with .py and then simply remove it
-        if module_name.endswith('.py'):
-            module_name = module_name.replace('.py', '')
-
-        module_file_name = module_name + '.py'
-        if not os.path.exists(module_file_name):
-            raise ValueError('No such local file %s' % module_file_name)
-
         # Add current absolute path to system path
+        # This is required for local modules to load.
         add_path = os.path.abspath('.')
         sys.path.append(add_path)
         self.info('Added %s to path' % add_path)
 
-        try:
-            module = __import__(module_name, fromlist=[''])
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError('Could not import module "' + module_name + '"')
+        """
+        Optional (local) module to load.
+        There several functionalities can be bundled at one place.
+        """
+        modules_option = self.option('modules')
+        loaded_modules = []
+        if modules_option:
+            for module_option in modules_option:
+                possible_module_file_name = module_option + '.py' if not module_option.endswith('.py') else module_option
+                if os.path.exists(possible_module_file_name):
+                    module_file_name = possible_module_file_name
+                    module_name = module_file_name.replace('.py', '')
 
-        try:
-            fn_init = module.init
-        except AttributeError:
-            raise ValueError('Could not find init() function in your module "%s". You probably need to define init(**kwargs)' % module_name)
+                    try:
+                        loaded_modules.append(__import__('.' + module_name, fromlist=['']))
+                    except ModuleNotFoundError:
+                        raise ModuleNotFoundError('Could not import "%s"' % module_name)
+        self.info('Loaded modules: %s' % loaded_modules)
+
 
         """ ---------------------------
         Static initial configuration.
@@ -68,7 +72,7 @@ class InitCommand(Command):
         config = {
             'global_unique_id': str(uuid.uuid4()),
             'pyklopp_version': __version__,
-            'init_module_name': module_name,
+            'loaded_modules': loaded_modules,
             'gpus_exclude': [],
             'python_seed_initial': None,
             'python_seed_random_lower_bound': 0,
@@ -113,12 +117,51 @@ class InitCommand(Command):
 
         config['time_config_end'] = time.time()
 
+
+        # For ease of usage, get_model can be either 'my_module.py' containing a get_model(**config) function
+        # or it can be a function such as my_module.get_model with signature (**config) where my_module can be
+        # a loadable module in the local path or an already loaded module via --modules
+        get_model = self.argument('model')
+        get_model_components = get_model.split('.')
+        fn_get_model = None  # This will be the model loading function with signature fn(**config)
+
+        if get_model.endswith('.py') or os.path.exists(get_model_components[0] + '.py'):
+            module_name = get_model_components[0]
+            module_file_name = module_name + '.py'
+            if not os.path.exists(module_file_name):
+                raise ValueError('No such local file %s' % module_file_name)
+
+            try:
+                module = __import__(module_name, fromlist=[''])
+            except ModuleNotFoundError:
+                raise ModuleNotFoundError('Could not import module "' + module_name + '"')
+
+            if get_model.endswith('.py') or len(get_model_components) < 2:
+                # get_model was 'my_module.py' or 'my_module'
+                try:
+                    fn_get_model = module.get_model
+                except AttributeError:
+                    raise ValueError(
+                        'Could not find get_model() function in your module "%s". You probably need to define get_model(**config)' % module_name)
+            else:
+                # get_model was s.th. like 'my_module.load_model'
+                mod = module
+                for load_name in get_model_components[1:]:
+                    mod = getattr(mod, load_name)
+                fn_get_model = mod
+        else:
+            fn_get_model = subpackage_import(get_model)
+
+        config['argument_model'] = get_model
+        config['get_model'] = str(fn_get_model.__name__)
+
+
         self.info('Configuration:')
         self.info(str(config))
 
         # Instantiate model
         config['time_model_init_start'] = time.time()
-        model = fn_init(**config)
+        model = fn_get_model(**config)
         config['time_model_init_end'] = time.time()
         assert isinstance(model, torch.nn.Module)
 

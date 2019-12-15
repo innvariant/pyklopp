@@ -137,6 +137,7 @@ class TrainCommand(Command):
             'gpus_exclude': [],
             'gpu_choice': None,  # if None, then random uniform of all available is chosen
             'num_epochs': 10,
+            'batch_size': 100,
             'learning_rate': 0.01,
             'dataset_config': {},
             'get_dataset_transformation': 'pyklopp.defaults.get_transform',
@@ -213,6 +214,9 @@ class TrainCommand(Command):
                     config['dataset_config']['transform'] = fn_get_custom_transformation()
 
                 dataset = class_dataset(**config['dataset_config'])
+
+                # After using the dataset_config sub-dict, make sure it contains pickable objects
+                config['dataset_config']['transform'] = str(fn_get_custom_transformation.__name__)
 
         config['dataset'] = str(dataset.__class__.__name__)
         n_training_samples = 30000

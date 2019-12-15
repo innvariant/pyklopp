@@ -29,9 +29,9 @@ class EvalCommand(Command):
     """
     Evaluates a pre-trained model on a given test data set.
 
-    train
+    eval
         {model : Path to the pytorch model file}
-        {get_testset : Function to retrieve the test set based on the assembled configuration}
+        {testset : Function to retrieve the test set based on the assembled configuration}
         {--m|modules=* : Optional module file to load.}
         {--c|config=* : Configuration JSON string or file path.}
         {--s|save= : Path (including optional name) to save the configuration to, e.g. sub/path/config.json}
