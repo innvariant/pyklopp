@@ -129,6 +129,7 @@ class TrainCommand(Command):
             'python_cwd': os.getcwd(),
             'hostname': socket.gethostname(),
             'time_config_start': time.time(),
+            'model_path': model_path,
             'model_persistence_name': model_file_name,  # If later set to None/empty, model will not be persisted
             'save_path_base': save_path_base,
             'config_persistence_name': 'config.json',
@@ -256,6 +257,7 @@ class TrainCommand(Command):
         except ModuleNotFoundError as e:
             raise ValueError('Could not find module when loading model: %s' % e)
         model.to(device)
+        config['model_pythonic_type'] = str(type(model))
 
         fn_get_optimizer = subpackage_import(config['get_optimizer'])
         optimizer = fn_get_optimizer(model.parameters(), **config)
