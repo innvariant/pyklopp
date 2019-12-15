@@ -1,5 +1,6 @@
 import pytest
 import os
+import shutil
 
 from cleo import Application
 from cleo import CommandTester
@@ -19,7 +20,7 @@ def test_value_error_on_unknown_module():
         command_tester.execute(unknown_module_name)
 
 
-def test_init_empty_module(tmp_path):
+def test_init_empty_module():
     application = Application()
     application.add(InitCommand())
 
@@ -44,12 +45,9 @@ def init(**args):
     except:
         # Clean up temporary module file
         os.remove(module_file_path)
-
-        os.remove(save_path)
-        os.remove(os.path.join(os.path.dirname(save_path), 'config.json'))
-        os.removedirs(os.path.dirname(save_path))
+        shutil.rmtree(os.path.dirname(save_path))
 
     os.remove(module_file_path)
-    os.remove(save_path)
-    os.remove(os.path.join(os.path.dirname(save_path), 'config.json'))
-    os.removedirs(os.path.dirname(save_path))
+    shutil.rmtree(os.path.dirname(save_path))
+
+

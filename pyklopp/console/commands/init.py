@@ -35,8 +35,10 @@ class InitCommand(Command):
 
             os.makedirs(save_path_base)
 
-
         module_name = self.argument('module')
+        # For bash-completion, also allow the module name to end with .py and then simply remove it
+        if module_name.endswith('.py'):
+            module_name = module_name.replace('.py', '')
 
         module_file_name = module_name + '.py'
         if not os.path.exists(module_file_name):
