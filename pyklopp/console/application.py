@@ -3,6 +3,7 @@ from cleo import Application as BaseApplication
 
 from .commands.init import InitCommand
 from .commands.train import TrainCommand
+from .commands.eval import EvalCommand
 
 
 class Application(BaseApplication):
@@ -17,7 +18,8 @@ class Application(BaseApplication):
     def get_default_commands(self):  # type: () -> list
         commands = [
             InitCommand(),
-            TrainCommand()
+            TrainCommand(),
+            EvalCommand()
         ]
 
         return commands
