@@ -79,7 +79,6 @@ class TrainCommand(Command):
                         loaded_modules.append(__import__('.' + module_name, fromlist=['']))
                     except ModuleNotFoundError:
                         raise ModuleNotFoundError('Could not import "%s"' % module_name)
-        self.info('Loaded modules: %s' % loaded_modules)
 
         """
         Load dataset module file
@@ -123,6 +122,7 @@ class TrainCommand(Command):
         config = {
             'global_unique_id': str(uuid.uuid4()),
             'pyklopp_version': __version__,
+            'loaded_modules': loaded_modules,
             'python_seed_initial': None,
             'python_seed_random_lower_bound': 0,
             'python_seed_random_upper_bound': 10000,
@@ -178,6 +178,9 @@ class TrainCommand(Command):
         python_seed_local = random.randint(a, b)
         config['python_seed_local'] = python_seed_local if 'python_seed_local' not in config else config['python_seed_local']
         random.seed(config['python_seed_local'])
+        torch.manual_seed(config['python_seed_local'])
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(config['python_seed_local'])
 
         # Re-Check file path for persistence before going into training
         if config['model_persistence_name'] is not None and len(config['model_persistence_name']) > 0:
