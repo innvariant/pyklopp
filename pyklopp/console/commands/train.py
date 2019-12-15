@@ -54,6 +54,12 @@ class TrainCommand(Command):
         if not os.path.exists(model_path):
             raise ValueError('Model not found in path "%s"' % model_path)
 
+        # Add current absolute path to system path to load local modules
+        # If initialized a module previously from a local module, then it must be available in path later again
+        add_path = os.path.abspath('.')
+        sys.path.append(add_path)
+        self.info('Added %s to path' % add_path)
+
         """
         Optional (local) module to load.
         There several functionalities can be bundled at one place.
@@ -61,10 +67,6 @@ class TrainCommand(Command):
         modules_option = self.option('modules')
         loaded_modules = []
         if modules_option:
-            # Add current absolute path to system path
-            add_path = os.path.abspath('.')
-            sys.path.append(add_path)
-            self.info('Added %s to path' % add_path)
 
             for module_option in modules_option:
                 possible_module_file_name = module_option + '.py' if not module_option.endswith('.py') else module_option
@@ -94,11 +96,6 @@ class TrainCommand(Command):
         if os.path.exists(dataset_possible_module_file_name):
             dataset_module_file_name = dataset_possible_module_file_name
             dataset_module_name = dataset_module_file_name.replace('.py', '')
-
-            # Add current absolute path to system path
-            add_path = os.path.abspath('.')
-            sys.path.append(add_path)
-            self.info('Added %s to path' % add_path)
 
             try:
                 module = __import__('.' + dataset_module_name, fromlist=[''])
@@ -217,7 +214,7 @@ class TrainCommand(Command):
 
                 # After using the dataset_config sub-dict, make sure it contains pickable objects
                 if 'dataset_config' in config and 'get_dataset_transformation' in config:
-                    config['dataset_config']['transform'] = str(config['dataset_config']['transform'].__name__)
+                    config['dataset_config']['transform'] = str(config['dataset_config']['transform'])
 
         config['dataset'] = str(dataset.__class__.__name__)
         n_training_samples = 30000
@@ -248,7 +245,10 @@ class TrainCommand(Command):
         config['device'] = str(device)
 
         # Load the model
-        model = torch.load(model_path)
+        try:
+            model = torch.load(model_path)
+        except ModuleNotFoundError as e:
+            raise ValueError('Could not find module when loading model: %s' % e)
         model.to(device)
 
         fn_get_optimizer = subpackage_import(config['get_optimizer'])
