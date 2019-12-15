@@ -216,7 +216,8 @@ class TrainCommand(Command):
                 dataset = class_dataset(**config['dataset_config'])
 
                 # After using the dataset_config sub-dict, make sure it contains pickable objects
-                config['dataset_config']['transform'] = str(fn_get_custom_transformation.__name__)
+                if 'dataset_config' in config and 'get_dataset_transformation' in config:
+                    config['dataset_config']['transform'] = str(config['dataset_config']['transform'].__name__)
 
         config['dataset'] = str(dataset.__class__.__name__)
         n_training_samples = 30000
