@@ -178,6 +178,7 @@ class TrainCommand(Command):
         python_seed_local = random.randint(a, b)
         config['python_seed_local'] = python_seed_local if 'python_seed_local' not in config else config['python_seed_local']
         random.seed(config['python_seed_local'])
+        np.random.seed(config['python_seed_local'])
         torch.manual_seed(config['python_seed_local'])
         if torch.cuda.is_available():
             torch.cuda.manual_seed(config['python_seed_local'])
