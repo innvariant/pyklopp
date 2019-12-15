@@ -41,3 +41,7 @@ def test_loader(**kwargs):
     mnist_train_loader, mnist_test_loader, _, selected_root = pypaddle.util.get_mnist_loaders(batch_size, '/media/data/set/mnist')
     return mnist_test_loader
 ```
+
+# Develop
+Create wheel files in *dist/*: ``poetry build``
+Install wheel in current environment with pip: ``pip install path/to/pyklopp/dist/pyklopp-0.1.0-py3-none-any.whl``

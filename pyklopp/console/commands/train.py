@@ -1,15 +1,12 @@
 import json
 import os
 import sys
-
 import time
-
 import uuid
-
 import torch
+import numpy as np
 
 from cleo import Command
-
 from pyklopp import __version__
 
 
@@ -74,12 +71,13 @@ class TrainCommand(Command):
             'global_unique_id': str(uuid.uuid4()),
             'pyklopp_version': __version__,
             'dataset_module_name': dataset_module_name,
-            'gpus_exclude': [],
             'python_seed_initial': None,
             'python_seed_random_lower_bound': 0,
             'python_seed_random_upper_bound': 10000,
             'time_config_start': time.time(),
             'model_persistence_name': model_file_name,  # If later set to None/empty, model will not be persisted
+            'gpus_exclude': [],
+            'gpu_choice': None,  # if None, then random uniform of all available is chosen
         }
 
         # Load user-defined configuration
@@ -106,6 +104,9 @@ class TrainCommand(Command):
 
         model = torch.load(model_path)
 
+        cuda_no = config['gpu_choice']
+        if config['gpu_choice'] is None:
+            config['gpu_choice'] = np.random.choice(np.setdiff1d(np.arange(torch.cuda.device_count()), config['gpu_choice']))
         cuda_no = 0
         if torch.cuda.is_available():
             cuda_no = 0
