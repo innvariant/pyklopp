@@ -13,6 +13,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+# Your model can be any pytorch module
+# Make sure to not define it locally (e.g. within the get_model()-function)
 class LeNet(nn.Module):
     def __init__(self, output_size):
         super(LeNet, self).__init__()
@@ -34,6 +36,8 @@ class LeNet(nn.Module):
         return out
 
 
+# This is your model-instantiation function
+# It receives an assembled configuration keyword argument list and should return an instance of your model
 def get_model(**kwargs):
     output_size = int(kwargs['output_size'])
 

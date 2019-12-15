@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import socket
 import sys
 import time
 import uuid
@@ -122,10 +123,11 @@ class TrainCommand(Command):
         config = {
             'global_unique_id': str(uuid.uuid4()),
             'pyklopp_version': __version__,
-            'dataset_argument': dataset_argument,
             'python_seed_initial': None,
             'python_seed_random_lower_bound': 0,
             'python_seed_random_upper_bound': 10000,
+            'python_cwd': os.getcwd(),
+            'hostname': socket.gethostname(),
             'time_config_start': time.time(),
             'model_persistence_name': model_file_name,  # If later set to None/empty, model will not be persisted
             'save_path_base': save_path_base,
@@ -136,6 +138,7 @@ class TrainCommand(Command):
             'num_epochs': 10,
             'batch_size': 100,
             'learning_rate': 0.01,
+            'dataset_argument': dataset_argument,
             'dataset_config': {},
             'get_dataset_transformation': 'pyklopp.defaults.get_transform',
             'get_optimizer': 'pyklopp.defaults.get_optimizer',

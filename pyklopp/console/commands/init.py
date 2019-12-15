@@ -1,4 +1,5 @@
 import random
+import socket
 import sys
 import os
 import json
@@ -77,7 +78,10 @@ class InitCommand(Command):
             'python_seed_initial': None,
             'python_seed_random_lower_bound': 0,
             'python_seed_random_upper_bound': 10000,
+            'python_cwd': os.getcwd(),
+            'hostname': socket.gethostname(),
             'time_config_start': time.time(),
+            'save_path_base': save_path_base,
             'model_persistence_name': model_file_name,  # If later set to None/empty, model will not be persisted
         }
 
