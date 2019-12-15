@@ -121,8 +121,7 @@ class InitCommand(Command):
         random.seed(config['python_seed_local'])
         np.random.seed(config['python_seed_local'])
         torch.manual_seed(config['python_seed_local'])
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed(config['python_seed_local'])
+        torch.cuda.manual_seed(config['python_seed_local'])
 
         config['time_config_end'] = time.time()
 
