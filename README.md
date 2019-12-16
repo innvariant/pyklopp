@@ -5,6 +5,10 @@ Pyklopp is a tool to initialize, train and evaluate pytorch models (currently fo
 It persists all relevant hyperparameters, timings and model configurations.
 Your prototyping is reduced to defining your model, the dataset and your desired parameters.
 
+## Installation
+- ``pip install pyklopp``
+- or by ``poetry build``, ``pip install dist/xxx.whl``
+
 # Defining model & dataset
 Specify your model in a plain python file, e.g.:
 ```python
@@ -93,5 +97,5 @@ def test_loader(**kwargs):
 ```
 
 # Develop
-Create wheel files in *dist/*: ``poetry build``
-Install wheel in current environment with pip: ``pip install path/to/pyklopp/dist/pyklopp-0.1.0-py3-none-any.whl``
+- Create wheel files in *dist/*: ``poetry build``
+- Install wheel in current environment with pip: ``pip install path/to/pyklopp/dist/pyklopp-0.1.0-py3-none-any.whl``

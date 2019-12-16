@@ -9,21 +9,13 @@ import torch
 import numpy as np
 import ignite
 
+from tqdm import tqdm
 from ignite.contrib.handlers import ProgressBar
-from ignite.engine import create_supervised_trainer, create_supervised_evaluator
+from ignite.engine import create_supervised_trainer, create_supervised_evaluator, Events
 from cleo import Command
 
-from pyklopp import __version__
-
-
-def subpackage_import(name):
-    components = name.split('.')
-
-    mod = __import__(components[0])
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-
-    return mod
+from pyklopp import __version__, subpackage_import
+from pyklopp.util import load_modules, load_dataset_from_argument
 
 
 class TrainCommand(Command):
@@ -66,19 +58,7 @@ class TrainCommand(Command):
         There several functionalities can be bundled at one place.
         """
         modules_option = self.option('modules')
-        loaded_modules = []
-        if modules_option:
-
-            for module_option in modules_option:
-                possible_module_file_name = module_option + '.py' if not module_option.endswith('.py') else module_option
-                if os.path.exists(possible_module_file_name):
-                    module_file_name = possible_module_file_name
-                    module_name = module_file_name.replace('.py', '')
-
-                    try:
-                        loaded_modules.append(__import__('.' + module_name, fromlist=['']))
-                    except ModuleNotFoundError:
-                        raise ModuleNotFoundError('Could not import "%s"' % module_name)
+        loaded_modules = load_modules(modules_option)
 
         """
         Load dataset module file
@@ -88,33 +68,7 @@ class TrainCommand(Command):
         class_dataset = None  # optional class which will be instanatiated with the configuration sub key 'dataset_config'
 
         # Either 'my_dataset' / 'my_dataset.py' or s.th. like 'torchvision.datasets.cifar.CIFAR10' or 'torchvision.datasets.mnist.MNIST'
-        dataset_argument = self.argument('dataset')
-
-        # For bash-completion, also allow the module name to end with .py and then simply remove it
-        dataset_module_file_name = None
-        dataset_possible_module_file_name = dataset_argument + '.py' if not dataset_argument.endswith('.py') else dataset_argument
-        if os.path.exists(dataset_possible_module_file_name):
-            dataset_module_file_name = dataset_possible_module_file_name
-            dataset_module_name = dataset_module_file_name.replace('.py', '')
-
-            try:
-                module = __import__('.' + dataset_module_name, fromlist=[''])
-            except ModuleNotFoundError:
-                raise ModuleNotFoundError('Could not import "%s"' % dataset_module_name)
-
-            try:
-                fn_get_dataset = module.get_dataset
-            except AttributeError:
-                raise ValueError('Could not find dataset() function in your module "%s". You probably need to define get_dataset(**kwargs)' % dataset_module_name)
-
-        # Assume argument to be s.th. like 'torchvision.datasets.cifar.CIFAR10'
-        if dataset_module_file_name is None:
-            if not '.' in dataset_argument:
-                raise ValueError('Dataset must be an attribute of a module. Expecting at least one dot.')
-            try:
-                class_dataset = subpackage_import(dataset_argument)
-            except ModuleNotFoundError:
-                raise ValueError('Could not import %s' % dataset_argument)
+        dataset_argument = str(self.argument('dataset'))
 
         """
         Assemble configuration with pre-defined config and user-defined json/file.
@@ -139,8 +93,7 @@ class TrainCommand(Command):
             'num_epochs': 10,
             'batch_size': 100,
             'learning_rate': 0.01,
-            'dataset_argument': dataset_argument,
-            'dataset_config': {},
+            'argument_dataset': dataset_argument,
             'get_dataset_transformation': 'pyklopp.defaults.get_transform',
             'get_optimizer': 'pyklopp.defaults.get_optimizer',
             'get_loss': 'pyklopp.defaults.get_loss',
@@ -163,7 +116,6 @@ class TrainCommand(Command):
                 assert type(user_config) is dict, 'User config must be a dictionary.'
 
                 config.update(user_config)
-
 
         # Dynamic configuration computations.
         # E.g. random numbers or seeds etc.
@@ -196,32 +148,7 @@ class TrainCommand(Command):
         Load configured dataset for training.
         """
         self.info('Loading dataset.')
-        if dataset is None:
-            if fn_get_dataset is None and class_dataset is None:
-                raise ValueError('Neither a dataset class nor a get_dataset(**kwargs) is defined.')
-            if fn_get_dataset:
-                # Dataset configuration key is only used for class instantiation
-                del(config['dataset_config'])
-                del(config['get_dataset_transformation'])
-
-                dataset = fn_get_dataset(**config)
-            else:
-                # In case of class instanatiation, try to load the custom transformation function
-                if 'dataset_config' in config and 'get_dataset_transformation' in config:
-                    get_dataset_transformation = config['get_dataset_transformation']
-                    try:
-                        fn_get_custom_transformation = subpackage_import(get_dataset_transformation)
-                    except ModuleNotFoundError:
-                        raise ValueError('Could not import transformation %s' % get_dataset_transformation)
-                    except AttributeError as e:
-                        raise ValueError('Could not load transformation due to attribute error for %s: %s' % (get_dataset_transformation, e))
-                    config['dataset_config']['transform'] = fn_get_custom_transformation()
-
-                dataset = class_dataset(**config['dataset_config'])
-
-                # After using the dataset_config sub-dict, make sure it contains pickable objects
-                if 'dataset_config' in config and 'get_dataset_transformation' in config:
-                    config['dataset_config']['transform'] = str(config['dataset_config']['transform'])
+        dataset = load_dataset_from_argument(dataset_argument, config)
 
         config['dataset'] = str(dataset.__class__.__name__)
         n_training_samples = 30000
@@ -268,19 +195,56 @@ class TrainCommand(Command):
         config['loss'] = str(fn_loss.__class__.__name__)
 
         self.info('Configuration:')
-        self.info(str(config))
+        self.info(json.dumps(config, indent=2, sort_keys=True))
 
         """
         The training loop.
         """
         trainer = create_supervised_trainer(model, optimizer, fn_loss, device=device)
 
-        pbar = ProgressBar()
-        pbar.attach(trainer, 'all')
+        pbar = ProgressBar(persist=True)
+        pbar.attach(trainer, metric_names='all')
+
+        metric_accuracy = ignite.metrics.Accuracy()
+        metric_precision = ignite.metrics.Precision(average=False)
+        metric_recall = ignite.metrics.Recall(average=False)
+        metric_f1 = (metric_precision * metric_recall * 2 / (metric_precision + metric_recall)).mean()
+        evaluation_metrics = {
+            'accuracy': metric_accuracy,
+            'precision': ignite.metrics.Precision(average=True),
+            'recall': ignite.metrics.Recall(average=True),
+            'f1': metric_f1,
+            'loss': ignite.metrics.Loss(fn_loss)
+        }
+        evaluator = create_supervised_evaluator(
+            model,
+            metrics=evaluation_metrics,
+            device=device
+        )
+        histories = {metric_name: [] for metric_name in evaluation_metrics}
+
+        @trainer.on(Events.EPOCH_COMPLETED)
+        def log_training_results(engine):
+            evaluator.run(train_loader)
+            metrics = evaluator.state.metrics
+
+            metric_infos = []
+            for metric_name in evaluation_metrics:
+                histories[metric_name].append(metrics[metric_name])
+                metric_infos.append("{metric}: {val:.3}".format(metric=metric_name, val=metrics[metric_name]))
+
+            pbar.log_message(
+                "Training - Epoch: {}, ".format(engine.state.epoch)
+                + ', '.join(metric_infos)
+            )
 
         config['time_model_training_start'] = time.time()
         trainer.run(train_loader, max_epochs=config['num_epochs'])
         config['time_model_training_end'] = time.time()
+
+        # Add the collected histories after each completed epoch to config
+        for metric_name in evaluation_metrics:
+            config['training_%s' % metric_name] = histories[metric_name]
 
         """
         Evaluation
@@ -297,23 +261,6 @@ class TrainCommand(Command):
                 batch_size=config['batch_size'],
                 sampler=test_sampler,
                 num_workers=2
-            )
-
-            metric_accuracy = ignite.metrics.Accuracy()
-            metric_precision = ignite.metrics.Precision(average=False)
-            metric_recall = ignite.metrics.Recall(average=False)
-            metric_f1 = (metric_precision * metric_recall * 2 / (metric_precision + metric_recall)).mean()
-            evaluation_metrics = {
-                'accuracy': metric_accuracy,
-                'precision': ignite.metrics.Precision(average=True),
-                'recall': ignite.metrics.Recall(average=True),
-                'f1': metric_f1,
-                'loss': ignite.metrics.Loss(fn_loss)
-            }
-            evaluator = create_supervised_evaluator(
-                model,
-                metrics=evaluation_metrics,
-                device=device
             )
 
             config['time_model_evaluation_start'] = time.time()
@@ -346,12 +293,17 @@ class TrainCommand(Command):
 
             config_key = config['config_key']
             if config_key not in full_config:
-                full_config[config_key] = []
-
-            full_config[config_key].append(config)
+                # Add config in the dict with a sub-key, e.g. { 'train': {..} }
+                full_config[config_key] = config
+            else:
+                # Add config in a list of the dict, e.g. { 'train': [{previous_config}, {..}] }
+                if type(full_config[config_key]) is not list:
+                    # Make sure, the config-key is a list, e.g. "{ 'train': {xyz} }" -> "{ 'train': [{xyz}] }"
+                    full_config[config_key] = [full_config[config_key]]
+                full_config[config_key].append(config)
 
             self.info('Writing configuration to "%s"' % config_file_path)
             with open(config_file_path, 'w') as handle:
-                json.dump(full_config, handle, indent=2)
+                json.dump(full_config, handle, indent=2, sort_keys=True)
 
         self.info('Done.')
