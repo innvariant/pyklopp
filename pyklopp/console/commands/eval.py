@@ -190,5 +190,6 @@ class EvalCommand(Command):
         for metric_name in evaluation_metrics:
             config['evaluation_%s' % metric_name] = np.float(evaluation_state.metrics[metric_name])
 
+        self.info('Final configuration:')
         self.info(json.dumps(config, indent=2, sort_keys=True))
         self.info('Done.')

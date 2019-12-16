@@ -306,4 +306,6 @@ class TrainCommand(Command):
             with open(config_file_path, 'w') as handle:
                 json.dump(full_config, handle, indent=2, sort_keys=True)
 
+        self.info('Final configuration:')
+        self.info(json.dumps(config, indent=2, sort_keys=True))
         self.info('Done.')
