@@ -11,6 +11,7 @@ import numpy as np
 from cleo import Command
 from pyklopp import __version__
 from pyklopp import subpackage_import
+from pyklopp.util import count_parameters
 
 
 class InitCommand(Command):
@@ -174,6 +175,7 @@ class InitCommand(Command):
         assert isinstance(model, torch.nn.Module)
 
         config['model_pythonic_type'] = str(type(model))
+        config['model_trainable_parameters'] = count_parameters(model)
 
         if save_path_base is not None:
             if config['model_persistence_name'] is not None and len(config['model_persistence_name']) > 0:

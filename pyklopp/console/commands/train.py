@@ -151,10 +151,8 @@ class TrainCommand(Command):
         dataset = load_dataset_from_argument(dataset_argument, config)
 
         config['dataset'] = str(dataset.__class__.__name__)
-        n_training_samples = 30000
-        n_val_samples = 5000
+        n_training_samples = len(dataset)
         train_sampler = torch.utils.data.SubsetRandomSampler(np.arange(n_training_samples, dtype=np.int64))
-        validation_sampler = torch.utils.data.SubsetRandomSampler(np.arange(n_training_samples, n_training_samples + n_val_samples, dtype=np.int64))
         config['time_dataset_loading_start'] = time.time()
         train_loader = torch.utils.data.DataLoader(
             dataset,
