@@ -178,7 +178,7 @@ class TrainCommand(Command):
 
         # Load the model
         try:
-            model = torch.load(model_path)
+            model = torch.load(model_path, map_location=device)
         except ModuleNotFoundError as e:
             raise ValueError('Could not find module when loading model: %s' % e)
         model.to(device)

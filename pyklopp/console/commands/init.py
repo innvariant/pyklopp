@@ -35,10 +35,11 @@ class InitCommand(Command):
             save_path_base = os.path.dirname(save_path)
             if len(save_path_base) < 1:
                 raise ValueError('You did not specify a path with "%s"' % save_path)
-            if os.path.exists(save_path_base):
+            if os.path.exists(os.path.join(save_path_base, model_file_name)):
                 raise ValueError('Path "%s" already exists' % save_path_base)
 
-            os.makedirs(save_path_base)
+            if not os.path.exists(save_path_base):
+                os.makedirs(save_path_base)
 
         # Add current absolute path to system path
         # This is required for local modules to load.
