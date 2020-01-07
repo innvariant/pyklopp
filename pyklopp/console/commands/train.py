@@ -43,9 +43,9 @@ class TrainCommand(Command):
             save_path_base = os.path.dirname(save_path)
 
         # Model file path (a persisted .pth pytorch model)
-        model_path = self.argument('model')
-        if not os.path.exists(model_path):
-            raise ValueError('Model not found in path "%s"' % model_path)
+        model_root_path = self.argument('model')
+        if not os.path.exists(model_root_path):
+            raise ValueError('Model not found in path "%s"' % model_root_path)
 
         # Add current absolute path to system path to load local modules
         # If initialized a module previously from a local module, then it must be available in path later again
@@ -83,7 +83,7 @@ class TrainCommand(Command):
             'python_cwd': os.getcwd(),
             'hostname': socket.gethostname(),
             'time_config_start': time.time(),
-            'model_path': model_path,
+            'model_root_path': model_root_path,
             'model_persistence_name': model_file_name,  # If later set to None/empty, model will not be persisted
             'save_path_base': save_path_base,
             'config_persistence_name': 'config.json',
@@ -178,7 +178,7 @@ class TrainCommand(Command):
 
         # Load the model
         try:
-            model = torch.load(model_path, map_location=device)
+            model = torch.load(model_root_path, map_location=device)
         except ModuleNotFoundError as e:
             raise ValueError('Could not find module when loading model: %s' % e)
         model.to(device)
@@ -275,6 +275,22 @@ class TrainCommand(Command):
             if config['model_persistence_name'] is not None and len(config['model_persistence_name']) > 0:
                 model_file_name = config['model_persistence_name']
                 model_file_path = os.path.join(save_path_base, model_file_name)
+
+                # If the model file path already exists, increment the name as long as we find a free name
+                model_file_name_increment = 1
+                model_file_name_parts = config['model_persistence_name'].split('.')
+                model_file_name_ending = model_file_name_parts[-1]
+                model_file_name_head = '.'.join(model_file_name_parts[:-1])
+                while os.path.exists(model_file_path):
+                    self.info('Model persistence path "%s" already exists. Choosing new one automatically.' % model_file_path)
+                    model_file_name = '.'.join([model_file_name_head, model_file_name_increment, model_file_name_ending])
+                    model_file_path = os.path.join(save_path_base, model_file_name)
+                    model_file_name_increment += 1
+
+                # Write model file name back in to config in case it changed during free-name-search
+                config['model_persistence_name'] = model_file_name
+                config['model_persistence_path'] = model_file_path
+
                 self.info('Saving to "%s"' % model_file_path)
                 config['time_model_save_start'] = time.time()
                 torch.save(model, model_file_path)
