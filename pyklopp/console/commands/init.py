@@ -11,6 +11,7 @@ import numpy as np
 from cleo import Command
 from pyklopp import __version__
 from pyklopp import subpackage_import
+from pyklopp.util import count_parameters
 
 
 class InitCommand(Command):
@@ -34,10 +35,11 @@ class InitCommand(Command):
             save_path_base = os.path.dirname(save_path)
             if len(save_path_base) < 1:
                 raise ValueError('You did not specify a path with "%s"' % save_path)
-            if os.path.exists(save_path_base):
+            if os.path.exists(os.path.join(save_path_base, model_file_name)):
                 raise ValueError('Path "%s" already exists' % save_path_base)
 
-            os.makedirs(save_path_base)
+            if not os.path.exists(save_path_base):
+                os.makedirs(save_path_base)
 
         # Add current absolute path to system path
         # This is required for local modules to load.
@@ -165,7 +167,7 @@ class InitCommand(Command):
 
 
         self.info('Configuration:')
-        self.info(str(config))
+        self.info(json.dumps(config, indent=2, sort_keys=True))
 
         # Instantiate model
         config['time_model_init_start'] = time.time()
@@ -174,6 +176,7 @@ class InitCommand(Command):
         assert isinstance(model, torch.nn.Module)
 
         config['model_pythonic_type'] = str(type(model))
+        config['model_trainable_parameters'] = count_parameters(model)
 
         if save_path_base is not None:
             if config['model_persistence_name'] is not None and len(config['model_persistence_name']) > 0:
@@ -188,7 +191,9 @@ class InitCommand(Command):
             config_file_path = os.path.join(save_path_base, config_file_name)
             self.info('Writing configuration to "%s"' % config_file_path)
             with open(config_file_path, 'w') as handle:
-                json.dump({'init': config}, handle, indent=2)
+                json.dump({'init': config}, handle, indent=2, sort_keys=True)
 
+        self.info('Final configuration:')
+        self.info(json.dumps(config, indent=2, sort_keys=True))
         self.info('Done.')
 
