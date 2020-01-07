@@ -7,6 +7,7 @@
 * Sorting of configuration on standard output and when writing to file
 * New keys in config such as training metrics
 * Started unifying behaviour of loading modules
+* automatically renaming of persistence path names to avoid overwriting issues
 
 ## 0.1
 * added commands *init* and *train*
