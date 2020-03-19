@@ -1,0 +1,10 @@
+before_script:
+  - pip install poetry
+
+install:
+  - poetry install
+
+tests:
+  stage: test
+  script:
+    - pytest --cov
