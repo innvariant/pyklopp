@@ -1,7 +1,7 @@
 before_script:
 - apt-get update -qy
 - apt-get install -y python3-dev python3-pip
-- pip install poetry
+- pip3 install poetry
 
 tests:
   stage: test
