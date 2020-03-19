@@ -1,10 +1,14 @@
-before_script:
-- apt-get update -qy
-- apt-get install -y python3-dev python3-pip python3-venv
-- pip3 install poetry
+image: "python:3.7"
+
+.install-deps-template: &install-deps
+  before_script:
+    - pip install poetry
+    - poetry --version
+    - poetry config settings.virtualenvs.in-project true
+    - poetry install -vv
 
 tests:
+  <<: *install-deps
   stage: test
   script:
-    - poetry install
-    - python3 -m pytest --cov
+    - pytest --cov tests/
