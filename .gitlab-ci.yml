@@ -4,6 +4,10 @@ cache:
     - .cache/pip
     - .venv
 
+stages:
+  - stage-quality
+  - stage-tests
+
 .install-deps-template: &install-deps
   before_script:
     - pip install poetry
@@ -13,7 +17,7 @@ cache:
 
 .test-template: &test
   <<: *install-deps
-  stage: tests
+  stage: stage-tests
   coverage: '/TOTAL.*\s(\d+\.\d+\%)/'
   script:
     - poetry run pytest tests/
