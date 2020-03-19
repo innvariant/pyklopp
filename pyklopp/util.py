@@ -7,7 +7,7 @@ def count_parameters(model: torch.nn.Module):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-def subpackage_import(name):
+def subpackage_import(name: str):
     components = name.split('.')
 
     mod = __import__(components[0])

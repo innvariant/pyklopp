@@ -160,7 +160,10 @@ class InitCommand(Command):
                     mod = getattr(mod, load_name)
                 fn_get_model = mod
         else:
-            fn_get_model = subpackage_import(get_model)
+            try:
+                fn_get_model = subpackage_import(get_model)
+            except ModuleNotFoundError as e:
+                raise ValueError('Could not find module <%s> via subpackage import.'.format(get_model), e)
 
         config['argument_model'] = get_model
         config['get_model'] = str(fn_get_model.__name__)

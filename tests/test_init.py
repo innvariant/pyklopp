@@ -40,12 +40,8 @@ def init(**args):
     command = application.find('init')
     command_tester = CommandTester(command)
 
-    try:
+    with pytest.raises(ValueError, match=r".*{fn_name}.*".format(fn_name='get_model')):
         command_tester.execute(module_name + ' --save=' + save_path)
-    except:
-        # Clean up temporary module file
-        os.remove(module_file_path)
-        shutil.rmtree(os.path.dirname(save_path))
 
     os.remove(module_file_path)
     shutil.rmtree(os.path.dirname(save_path))
