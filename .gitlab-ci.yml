@@ -7,4 +7,4 @@ tests:
   stage: test
   script:
     - poetry install
-    - pytest --cov
+    - python3 pytest --cov
