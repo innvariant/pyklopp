@@ -4,5 +4,7 @@ before_script:
 tests:
   stage: test
   script:
+    - apt-get update -qy
+    - apt-get install -y python-dev python-pip
     - poetry install
     - pytest --cov
