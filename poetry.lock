@@ -57,7 +57,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "0.4.3"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Read metadata from Python packages"
 marker = "python_version < \"3.8\""
 name = "importlib-metadata"
@@ -71,6 +71,26 @@ zipp = ">=0.5"
 [package.extras]
 docs = ["sphinx", "rst.linker"]
 testing = ["packaging", "importlib-resources"]
+
+[[package]]
+category = "main"
+description = "Read resources from Python packages"
+name = "importlib-resources"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
+version = "1.4.0"
+
+[package.dependencies]
+[package.dependencies.importlib-metadata]
+python = "<3.8"
+version = "*"
+
+[package.dependencies.zipp]
+python = "<3.8"
+version = ">=0.4"
+
+[package.extras]
+docs = ["sphinx", "rst.linker", "jaraco.packaging"]
 
 [[package]]
 category = "dev"
@@ -138,9 +158,10 @@ description = ""
 name = "poetry-project"
 optional = false
 python-versions = ">=3.5,<4.0"
-version = "0.1.0"
+version = "0.2.0"
 
 [package.dependencies]
+importlib-resources = ">=1.4.0,<2.0.0"
 tomlkit = ">=0.5.11,<0.6.0"
 
 [[package]]
@@ -254,7 +275,7 @@ python-versions = "*"
 version = "3.7.4.1"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 marker = "python_version < \"3.8\""
 name = "zipp"
@@ -267,7 +288,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["pathlib2", "unittest2", "jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "cdeee685d76478276ecda09b1238fab36ad0138de9558a5615fbbcf065f1d0e9"
+content-hash = "ae4aa090231f1323eed65cfac9a367099b08d7ce84ecfd7801c2897f6807f23e"
 python-versions = "^3.5"
 
 [metadata.files]
@@ -294,6 +315,10 @@ colorama = [
 importlib-metadata = [
     {file = "importlib_metadata-1.5.0-py2.py3-none-any.whl", hash = "sha256:b97607a1a18a5100839aec1dc26a1ea17ee0d93b20b0f008d80a5a050afb200b"},
     {file = "importlib_metadata-1.5.0.tar.gz", hash = "sha256:06f5b3a99029c7134207dd882428a66992a9de2bef7c2b699b5641f9886c3302"},
+]
+importlib-resources = [
+    {file = "importlib_resources-1.4.0-py2.py3-none-any.whl", hash = "sha256:dd98ceeef3f5ad2ef4cc287b8586da4ebad15877f351e9688987ad663a0a29b8"},
+    {file = "importlib_resources-1.4.0.tar.gz", hash = "sha256:4019b6a9082d8ada9def02bece4a76b131518866790d58fdda0b5f8c603b36c2"},
 ]
 more-itertools = [
     {file = "more-itertools-8.2.0.tar.gz", hash = "sha256:b1ddb932186d8a6ac451e1d95844b382f55e12686d51ca0c68b6f61f2ab7a507"},
@@ -359,8 +384,8 @@ pluggy = [
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
 ]
 poetry-project = [
-    {file = "poetry-project-0.1.0.tar.gz", hash = "sha256:25f0089b8d232aa5e1ec0fe2ef1bc3fe4f40946baf77bf29dbd13aa46f428af3"},
-    {file = "poetry_project-0.1.0-py3-none-any.whl", hash = "sha256:7aa8d8ee86f9c921ce18e0326af98d87e98abc9f35c4121a43ee536c6ecfa33d"},
+    {file = "poetry-project-0.2.0.tar.gz", hash = "sha256:13f721126c7a5cf6688289d11e8d38503c3e7bccc7a4dfed874638090eff8752"},
+    {file = "poetry_project-0.2.0-py3-none-any.whl", hash = "sha256:b3a75997f76b9ad15debdcf9b339261129fef7775444188778a6cd0ee95884a0"},
 ]
 py = [
     {file = "py-1.8.1-py2.py3-none-any.whl", hash = "sha256:c20fdd83a5dbc0af9efd622bee9a5564e278f6380fffcacc43ba6f43db2813b0"},
