@@ -28,9 +28,9 @@ stages:
     expire_in: 1 week
 
 # Test Jobs
-test-python3.4:
+test-python3.5:
   <<: *test
-  image: python:3.4
+  image: python:3.5
 
 test-python3.6:
   <<: *test
