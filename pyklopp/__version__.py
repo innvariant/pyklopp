@@ -1,1 +1,2 @@
-__version__ = '0.2.0'
+from poetry_project import get_version
+__version__ = get_version()

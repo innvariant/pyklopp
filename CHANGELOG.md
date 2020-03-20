@@ -9,6 +9,7 @@
 * Started unifying behaviour of loading modules
 * automatically renaming of persistence path names to avoid overwriting issues
 * changed paramter *model_path* to *model_root_path*
+* gitlab CI added
 
 ## 0.1
 * added commands *init* and *train*
