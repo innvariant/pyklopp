@@ -7,6 +7,11 @@ authors = [
 ]
 license = "MIT"
 
+include = [
+    "pyproject.toml",
+    "README.md"
+]
+
 readme = "README.md"
 
 homepage = "https://github.com/innvariant/pyklopp"
