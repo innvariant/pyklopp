@@ -97,7 +97,16 @@ def load_dataset_from_argument(dataset_arg : str, assembled_config : dict) -> to
 
         assembled_config['dataset_getter'] = fn_get_dataset.__name__
     else:
-        dataset_config = {key.replace('dataset_', ''): assembled_config[key] for key in assembled_config if key.startswith('dataset_')}
+        # Assemble a dataset-class-only configuration dict
+        dataset_config = {}
+        if 'dataset_config' in assembled_config:
+            # The special key 'dataset_config' may contain several keys for the dataset
+            dataset_config = assembled_config['dataset_config']
+        # All keys prefixed with 'dataset_' are also added (without prefix) to the config:
+        for key in assembled_config:
+            if key.startswith('dataset_'):
+                ds_config_key = key.replace('dataset_', '')
+                dataset_config[ds_config_key] = assembled_config[key]
 
         # In case of class instanatiation, try to load the custom transformation function
         if 'get_dataset_transformation' in assembled_config:
