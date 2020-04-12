@@ -20,6 +20,18 @@ def test_value_error_on_unknown_module():
         command_tester.execute(unknown_module_name)
 
 
+def test_value_error_on_invalid_config_with_single_quotes():
+    application = Application()
+    application.add(InitCommand())
+    invalid_config = '{\'output_size\': 10}'
+    module_name = 'foo'
+    command = application.find('init')
+    command_tester = CommandTester(command)
+
+    with pytest.raises(ValueError, match=r".*{reason}.*".format(reason='double quotes')):
+        command_tester.execute(module_name + ' --config "' + invalid_config + '"')
+
+
 def test_value_error_on_unknown_model_getter():
     application = Application()
     application.add(InitCommand())

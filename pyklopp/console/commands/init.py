@@ -101,6 +101,8 @@ class InitCommand(Command):
                         user_config = json.loads(config_option)
                     except TypeError:
                         raise ValueError('Invalid JSON as config passed.')
+                    except json.JSONDecodeError as json_error:
+                        raise ValueError('Invalid JSON as config passed: "%s"' % config_option, json_error)
                 assert type(user_config) is dict, 'User config must be a dictionary.'
 
                 config.update(user_config)
