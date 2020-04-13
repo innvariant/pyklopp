@@ -1,5 +1,7 @@
 import os
 import sys
+
+import cleo
 import torch
 
 
@@ -125,3 +127,23 @@ def load_dataset_from_argument(dataset_arg : str, assembled_config : dict) -> to
         assembled_config['dataset_class'] = class_dataset.__name__
 
     return dataset
+
+
+def save_paths_obtain_and_check(command: cleo.Command) -> (str, str):
+    # Early check for save path
+    save_path_base = None
+    model_file_name = None
+    if command.option('save'):
+        save_path = str(command.option('save'))
+        model_file_name = os.path.basename(save_path)
+        # TODO check for model file name
+        save_path_base = os.path.dirname(save_path)
+        if len(save_path_base) < 1:
+            raise ValueError('You did not specify a valid save path. Given was "%s"' % save_path)
+        if os.path.exists(os.path.join(save_path_base, model_file_name)):
+            raise ValueError('Path "%s" already exists' % save_path_base)
+
+        if not os.path.exists(save_path_base):
+            os.makedirs(save_path_base)
+
+    return save_path_base, model_file_name

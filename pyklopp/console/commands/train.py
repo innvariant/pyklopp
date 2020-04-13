@@ -15,7 +15,7 @@ from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from cleo import Command
 
 from pyklopp import __version__, subpackage_import
-from pyklopp.util import load_modules, load_dataset_from_argument
+from pyklopp.util import load_modules, load_dataset_from_argument, save_paths_obtain_and_check
 
 
 class TrainCommand(Command):
@@ -32,15 +32,7 @@ class TrainCommand(Command):
 
     def handle(self):
         # Early check for save path
-        save_path_base = None
-        model_file_name = None
-        if self.option('save'):
-            save_path = str(self.option('save'))
-            if os.path.exists(save_path):
-                raise ValueError('Path to save model to "%s" already exists' % save_path)
-
-            model_file_name = os.path.basename(save_path)
-            save_path_base = os.path.dirname(save_path)
+        save_path_base, model_file_name = save_paths_obtain_and_check(self)
 
         # Model file path (a persisted .pth pytorch model)
         model_root_path = self.argument('model')

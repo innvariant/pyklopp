@@ -11,7 +11,7 @@ import numpy as np
 from cleo import Command
 from pyklopp import __version__
 from pyklopp import subpackage_import
-from pyklopp.util import count_parameters
+from pyklopp.util import count_parameters, save_paths_obtain_and_check
 
 
 class InitCommand(Command):
@@ -27,19 +27,7 @@ class InitCommand(Command):
 
     def handle(self):
         # Early check for save path
-        save_path_base = None
-        model_file_name = None
-        if self.option('save'):
-            save_path = str(self.option('save'))
-            model_file_name = os.path.basename(save_path)
-            save_path_base = os.path.dirname(save_path)
-            if len(save_path_base) < 1:
-                raise ValueError('You did not specify a path with "%s"' % save_path)
-            if os.path.exists(os.path.join(save_path_base, model_file_name)):
-                raise ValueError('Path "%s" already exists' % save_path_base)
-
-            if not os.path.exists(save_path_base):
-                os.makedirs(save_path_base)
+        save_path_base, model_file_name = save_paths_obtain_and_check(self)
 
         # Add current absolute path to system path
         # This is required for local modules to load.

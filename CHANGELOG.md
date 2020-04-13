@@ -2,6 +2,9 @@
 
 # Development Version
 
+## 0.3
+* started unifying behaviour on passing save path (we will create one config file per command call)
+
 ## 0.2
 * Logging of evaluation metrics during training
 * Sorting of configuration on standard output and when writing to file

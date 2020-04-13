@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyklopp"
-version = "0.2.2"
+version = "0.3.0"
 description = ""
 authors = [
     "Julian Stier <julian.stier@uni-passau.de>"
@@ -31,6 +31,8 @@ importlib-metadata = "^1.5.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
+pytest-mock = "^3.0.0"
+pyfakefs = "^4.0.2"
 
 [tool.poetry.scripts]
 pyklopp = "pyklopp.console:main"
