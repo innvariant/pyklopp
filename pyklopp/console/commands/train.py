@@ -15,7 +15,7 @@ from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from cleo import Command
 
 from pyklopp import __version__, subpackage_import
-from pyklopp.util import load_modules, load_dataset_from_argument, save_paths_obtain_and_check
+from pyklopp.util import load_modules, load_dataset_from_argument, save_paths_obtain_and_check, load_custom_config
 
 
 class TrainCommand(Command):
@@ -96,17 +96,7 @@ class TrainCommand(Command):
         if self.option('config'):
             for config_option in self.option('config'):
                 config_option = str(config_option)
-                if os.path.exists(config_option):
-                    self.info('Loading configuration from "%s"' % config_option)
-                    with open(config_option, 'r') as handle:
-                        user_config = json.load(handle)
-                else:
-                    try:
-                        user_config = json.loads(config_option)
-                    except TypeError:
-                        raise ValueError('Invalid JSON as config passed.')
-                assert type(user_config) is dict, 'User config must be a dictionary.'
-
+                user_config = load_custom_config(config_option)
                 config.update(user_config)
 
         # Dynamic configuration computations.

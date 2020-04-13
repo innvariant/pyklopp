@@ -1,8 +1,15 @@
+import json
 import os
+import socket
 import sys
+import time
+import uuid
+import warnings
 
 import cleo
 import torch
+
+from pyklopp import __version__
 
 
 def count_parameters(model: torch.nn.Module):
@@ -30,7 +37,7 @@ def add_local_path(fn_info=None):
             fn_info('Added "%s" to path.' % add_path)
 
 
-def load_modules(module_args : list):
+def load_modules(module_args: list) -> list:
     loaded_modules = []
 
     if module_args is None:
@@ -45,8 +52,8 @@ def load_modules(module_args : list):
 
             try:
                 loaded_modules.append(__import__('.' + module_name, fromlist=['']))
-            except ModuleNotFoundError:
-                raise ModuleNotFoundError('Could not import "%s"' % module_name)
+            except ModuleNotFoundError as e:
+                raise ModuleNotFoundError('Could not import "%s". Have you added "." to your system path?' % module_name, e)
 
     return loaded_modules
 
@@ -147,3 +154,79 @@ def save_paths_obtain_and_check(command: cleo.Command) -> (str, str):
             os.makedirs(save_path_base)
 
     return save_path_base, model_file_name
+
+
+def build_default_config(command: cleo.Command, base_config: dict = None):
+    if base_config is None:
+        base_config = {}
+    config = base_config.copy()
+
+    config = config.update({
+        'global_unique_id': str(uuid.uuid4()),
+        'pyklopp_version': __version__,
+        'loaded_modules': None,
+        'gpus_exclude': [],
+        'gpu_choice': None,  # if None, then random uniform of all available is chosen
+        'python_seed_initial': None,
+        'python_seed_random_lower_bound': 0,
+        'python_seed_random_upper_bound': 10000,
+        'python_cwd': os.getcwd(),
+        'hostname': socket.gethostname(),
+        'time_config_start': time.time(),
+        'save_path_base': None,
+        'model_persistence_name': None,
+        'config_persistence_name': 'config.json',
+        'argument_dataset': None,
+    })
+
+    all_options = command.option()
+    all_arguments = command.argument()
+    for prefix_name, keywords in zip(['option', 'argument'], [all_options, all_arguments]):
+        for kwname in keywords:
+            config[prefix_name+'_'+kwname] = keywords[kwname]
+
+    return config
+
+
+def build_default_training_config(base_config: dict = None):
+    if base_config is None:
+        base_config = {}
+    config = base_config.copy()
+
+    config.update({
+        'model_root_path': None,
+        'num_epochs': 10,
+        'batch_size': 100,
+        'learning_rate': 0.01,
+        'get_dataset_transformation': 'pyklopp.defaults.get_transform',
+        'get_optimizer': 'pyklopp.defaults.get_optimizer',
+        'get_loss': 'pyklopp.defaults.get_loss',
+        'get_dataset_test': None,
+    })
+
+    return config
+
+
+def load_custom_config(config_option: str):
+    if os.path.exists(config_option):
+        with open(config_option, 'r') as handle:
+            user_config = json.load(handle)
+    else:
+        try:
+            user_config = json.loads(config_option)
+        except TypeError as e:
+            raise ValueError('Invalid JSON as config passed.', e)
+        except json.decoder.JSONDecodeError as e:
+            raise ValueError('Your configuration can not decoded properly. It might contain invalid JSON: < {text} >'.format(text=config_option), e)
+
+    if not type(user_config) is dict:
+        raise ValueError('User config must be a dictionary, but <{type}> was given: < {text} >'.format(text=user_config, type=type(user_config).__name__))
+
+    reserved_prefixes = ['time', 'option', 'argument', 'config', 'python']
+    if any(map(lambda k: any((k.startswith(p) for p in reserved_prefixes)), user_config)):
+        warnings.warn('Custom config contains a keyword beginning with a reserved prefix.'
+                      'Reserved prefixes are {prefixes}'.format(prefixes=reserved_prefixes))
+
+    return user_config
+
+

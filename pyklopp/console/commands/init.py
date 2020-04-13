@@ -11,7 +11,7 @@ import numpy as np
 from cleo import Command
 from pyklopp import __version__
 from pyklopp import subpackage_import
-from pyklopp.util import count_parameters, save_paths_obtain_and_check
+from pyklopp.util import count_parameters, save_paths_obtain_and_check, load_modules, load_custom_config
 
 
 class InitCommand(Command):
@@ -40,18 +40,7 @@ class InitCommand(Command):
         There several functionalities can be bundled at one place.
         """
         modules_option = self.option('modules')
-        loaded_modules = []
-        if modules_option:
-            for module_option in modules_option:
-                possible_module_file_name = module_option + '.py' if not module_option.endswith('.py') else module_option
-                if os.path.exists(possible_module_file_name):
-                    module_file_name = possible_module_file_name
-                    module_name = module_file_name.replace('.py', '')
-
-                    try:
-                        loaded_modules.append(__import__('.' + module_name, fromlist=['']))
-                    except ModuleNotFoundError:
-                        raise ModuleNotFoundError('Could not import "%s"' % module_name)
+        loaded_modules = load_modules(modules_option)
         self.info('Loaded modules: %s' % loaded_modules)
 
 
@@ -80,19 +69,7 @@ class InitCommand(Command):
         if self.option('config'):
             for config_option in self.option('config'):
                 config_option = str(config_option)
-                if os.path.exists(config_option):
-                    self.info('Loading configuration from "%s"' % config_option)
-                    with open(config_option, 'r') as handle:
-                        user_config = json.load(handle)
-                else:
-                    try:
-                        user_config = json.loads(config_option)
-                    except TypeError:
-                        raise ValueError('Invalid JSON as config passed.')
-                    except json.JSONDecodeError as json_error:
-                        raise ValueError('Invalid JSON as config passed: "%s"' % config_option, json_error)
-                assert type(user_config) is dict, 'User config must be a dictionary.'
-
+                user_config = load_custom_config(config_option)
                 config.update(user_config)
 
         """ ---------------------------

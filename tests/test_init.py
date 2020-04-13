@@ -32,6 +32,30 @@ def test_value_error_on_invalid_config_with_single_quotes():
         command_tester.execute(module_name + ' --config "' + invalid_config + '"')
 
 
+def test_value_error_on_invalid_config_with_decoding():
+    application = Application()
+    application.add(InitCommand())
+    invalid_config = '{\"unclosed_key: 15}'
+    module_name = 'foo'
+    command = application.find('init')
+    command_tester = CommandTester(command)
+
+    with pytest.raises(ValueError, match=r".*{reason}.*".format(reason='invalid')):
+        command_tester.execute(module_name + ' --config \'' + invalid_config + '\'')
+
+
+def test_init_error_custom_config_with_list():
+    application = Application()
+    application.add(InitCommand())
+    invalid_config = '[{"conf_key": "value"}]'
+    module_name = 'foo'
+    command = application.find('init')
+    command_tester = CommandTester(command)
+
+    with pytest.raises(ValueError):
+        command_tester.execute(module_name + ' --config \'' + invalid_config + '\'')
+
+
 def test_value_error_on_unknown_model_getter():
     application = Application()
     application.add(InitCommand())
