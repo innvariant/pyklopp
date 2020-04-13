@@ -6,7 +6,8 @@ from unittest.mock import Mock, MagicMock
 from pyfakefs.fake_filesystem import FakeFilesystem
 
 from pyklopp.console.commands.init import InitCommand
-from pyklopp.util import save_paths_obtain_and_check, load_modules, add_local_path, build_default_config
+from pyklopp.util import save_paths_obtain_and_check, load_modules, add_local_path_to_system, build_default_config, \
+    remove_local_path_from_system
 
 
 def test_save_paths_obtain_and_check(fs: FakeFilesystem):
@@ -47,7 +48,7 @@ def test_load_modules():
     with open(local_module_file, 'w') as file_handle:
         file_handle.write(definition_my_module)
     # Make sure the local path is added to enable local imports
-    add_local_path()
+    add_local_path_to_system()
 
     loaded_modules = load_modules([local_module_name])
 
@@ -55,6 +56,7 @@ def test_load_modules():
     assert len(loaded_modules) > 0
 
     # Cleanup
+    remove_local_path_from_system()
     os.remove(local_module_file)
 
 
@@ -62,25 +64,31 @@ def test_load_modules_error_non_existing_module_file():
     # Arrange
     non_existing_module_name = 'non_existing_module'
     # Make sure the local path is added to enable local imports
-    add_local_path()
+    add_local_path_to_system()
 
-    with pytest.raises(ModuleNotFoundError, match=r".*{reason}.*".format(reason='Could not import')):
-        load_modules([non_existing_module_name])
+    loaded = load_modules([non_existing_module_name])
+
+    assert len(loaded) is 0
+
+    # Cleanup
+    remove_local_path_from_system()
 
 
 def test_load_modules_error_local_path_not_added():
     # Arrange
-    non_existing_module_name = 'non_existing_module'
-    non_existing_module_file = non_existing_module_name + '.py'
+    empty_module_name = 'empty_module'
+    empty_module_file = empty_module_name + '.py'
     definition_my_module = ''
-    with open(non_existing_module_file, 'w') as file_handle:
+    with open(empty_module_file, 'w') as file_handle:
         file_handle.write(definition_my_module)
+    # Make sure current path is not in sys.path
+    remove_local_path_from_system()
 
     with pytest.raises(ModuleNotFoundError, match=r".*{reason}.*".format(reason='Could not import')):
-        load_modules([non_existing_module_name])
+        load_modules([empty_module_name])
 
     # Cleanup
-    os.remove(non_existing_module_file)
+    os.remove(empty_module_file)
 
 
 def test_build_default_config():

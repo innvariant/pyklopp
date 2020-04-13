@@ -14,7 +14,7 @@ from ignite.engine import create_supervised_evaluator
 from cleo import Command
 
 from pyklopp import __version__, subpackage_import
-from pyklopp.util import load_modules, load_dataset_from_argument, add_local_path
+from pyklopp.util import load_modules, load_dataset_from_argument, add_local_path_to_system
 
 
 class EvalCommand(Command):
@@ -54,7 +54,7 @@ class EvalCommand(Command):
                 os.makedirs(save_path_base)
 
         # Load optional modules
-        add_local_path(self.info)
+        add_local_path_to_system(self.info)
         modules_option = self.option('modules')
         loaded_modules = load_modules(modules_option)
 

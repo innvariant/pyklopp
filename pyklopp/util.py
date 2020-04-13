@@ -26,7 +26,7 @@ def subpackage_import(name: str):
     return mod
 
 
-def add_local_path(fn_info=None):
+def add_local_path_to_system(fn_info=None):
     # Add current absolute path to system path to load local modules
     # If initialized a module previously from a local module, then it must be available in path later again
     add_path = os.path.abspath('.')
@@ -35,6 +35,11 @@ def add_local_path(fn_info=None):
 
         if fn_info is not None:
             fn_info('Added "%s" to path.' % add_path)
+
+
+def remove_local_path_from_system():
+    remove_path = os.path.abspath('.')
+    sys.path = [path for path in sys.path if path != remove_path]
 
 
 def load_modules(module_args: list) -> list:
@@ -68,7 +73,7 @@ def load_dataset_from_argument(dataset_arg : str, assembled_config : dict) -> to
     fn_get_dataset = None  # optional function to load the dataset based on the allocated configuration
     class_dataset = None  # optional class which will be instanatiated with the configuration sub key 'dataset_config'
 
-    add_local_path()
+    add_local_path_to_system()
 
     # For bash-completion, also allow the module name to end with .py and then simply remove it
     dataset_module_file_name = None
@@ -167,7 +172,7 @@ def build_default_config(command: cleo.Command, base_config: dict = None):
         base_config = {}
     config = base_config.copy()
 
-    config = config.update({
+    config.update({
         'global_unique_id': str(uuid.uuid4()),
         'pyklopp_version': __version__,
         'loaded_modules': None,
