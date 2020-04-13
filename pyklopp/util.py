@@ -129,7 +129,13 @@ def load_dataset_from_argument(dataset_arg : str, assembled_config : dict) -> to
 
             dataset_config['transform'] = fn_get_custom_transformation()
 
-        dataset = class_dataset(**dataset_config)
+        try:
+            dataset = class_dataset(**dataset_config)
+        except TypeError as e:
+            raise ValueError('Could not initialize dataset class.'
+                             'Probably arguments are missing.'
+                             'Arguments prefixed with "dataset_" are passed directly to the dataset object.'
+                             'Collected dataset config was < {config} >'.format(config=dataset_config), e)
 
         assembled_config['dataset_class'] = class_dataset.__name__
 

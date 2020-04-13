@@ -51,7 +51,7 @@ def get_model(**kwargs):
 Invoke pyklopp to initialize it: ``pyklopp init my_model.get_model --save='test/model.pth' --config='{"output_size": 10}'``
 Train it on *cifar10*:
 - ``pyklopp train test/model.pth cifar10.py --save='test/trained.pth' --config='{"batch_size": 100}'``
-- ``pyklopp train test/model.pth torchvision.datasets.cifar.CIFAR10 --save 'test/trained.pth' --config='{"dataset_config": {"root": "/media/data/set/cifar10"}}'``
+- ``pyklopp train test/model.pth torchvision.datasets.cifar.CIFAR10 --save 'test/trained.pth' --config='{"dataset_root": "/media/data/set/cifar10"}'``
 
 
 # Examples
