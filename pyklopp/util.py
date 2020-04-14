@@ -101,6 +101,8 @@ def load_dataset_from_argument(dataset_arg : str, assembled_config : dict) -> to
             class_dataset = subpackage_import(dataset_arg)
         except ModuleNotFoundError:
             raise ValueError('Could not import %s' % dataset_arg)
+        except AttributeError as e:
+            raise ValueError('You passed <{arg}> but we could not find the attribute within your package. It has thrown an attribute error'.format(arg=dataset_arg), e)
 
     if fn_get_dataset is None and class_dataset is None:
         raise ValueError('Neither a dataset class nor a get_dataset(**kwargs) is defined.')
