@@ -5,9 +5,15 @@ Pyklopp is a tool to initialize, train and evaluate pytorch models (currently fo
 It persists all relevant hyperparameters, timings and model configurations.
 Your prototyping is reduced to defining your model, the dataset and your desired parameters.
 
+![Workflow sketch for developing a model and running it with pyklopp.](res/approach.png)
+
+
 ## Installation
-- ``pip install pyklopp``
-- or by ``poetry build``, ``pip install dist/xxx.whl``
+You can install a version from PyPi with: ``pip install pyklopp``.
+
+To install the latest development build, you can clone the repository and invoke ``poetry build`` (having poetry installed).
+Then you can use the built package and install it with pip in your current environment by ``pip install dist/xxx.whl``.
+
 
 # Defining model & dataset
 Specify your model in a plain python file, e.g.:
@@ -95,6 +101,7 @@ def test_loader(**kwargs):
     mnist_train_loader, mnist_test_loader, _, selected_root = pypaddle.util.get_mnist_loaders(batch_size, '/media/data/set/mnist')
     return mnist_test_loader
 ```
+
 
 # Development
 - Create wheel files in *dist/*: ``poetry build``
