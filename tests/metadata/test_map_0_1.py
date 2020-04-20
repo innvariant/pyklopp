@@ -1,19 +1,21 @@
 import pytest
 import json
 
-from pyklopp.metadata import MetadataMapV0V1
+from pyklopp.metadata import MetadataMapV0V1, Metadata
 
 
 def test_construct():
-    data = {
-        'schema_version': '0.1.0',
-        'system': {
-            'foo': 'bar'
-        }
-    }
+    MetadataMapV0V1({}, {})
 
-    map = MetadataMapV0V1(data, {})
-    #map.map_all()
+
+def test_fill_empty_unstrict():
+    empty_metadata = Metadata()
+    result = {}
+
+    map = MetadataMapV0V1({}, result)
+    map.remap_all(empty_metadata)
+
+    print(result)
 
 
 def _test_construct_with_specific_version():

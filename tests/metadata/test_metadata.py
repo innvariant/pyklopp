@@ -3,14 +3,6 @@ import pytest
 from pyklopp.metadata import *
 
 
-empty_metadata = Metadata()
-metadata_v0v1 = None
-
-def test_load_schema_latest_success():
-    schema = load_schema()
-    assert len(schema) > 1
-
-
 def test_metadata_construct():
     Metadata()
 

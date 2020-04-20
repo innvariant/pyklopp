@@ -30,6 +30,11 @@ class MetadataError(Exception):
    pass
 
 
+class MappingError(MetadataError):
+   """Base class for other exceptions"""
+   pass
+
+
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
@@ -195,9 +200,9 @@ class MetadataMap(object):
         for prop in data.properties():
             try:
                 setattr(data, prop, self.map(prop, self.reader))
-            except KeyError as e:
+            except MappingError as e:
                 if strict:
-                    raise KeyError(e)
+                    raise MappingError(e)
 
     def remap_all(self, data: PropertyObject):
         for prop in data.properties():
@@ -238,9 +243,11 @@ class ScopedMetadataMap(MetadataMap):
 
         unscoped_dict = reader
         for scope in scopes:
+            #print('Scope: ', scope)
+            #print(unscoped_dict)
             unscoped_dict = unscoped_dict[scope]
         if key not in unscoped_dict:
-            raise KeyError('Did not find <{name}> which was mapped to <{key}> with scope <{scope}>'.format(name=metadata_key, key=key, scope=self.scope_separator.join(scopes)))
+            raise MappingError('Did not find <{name}> which was mapped to <{key}> with scope <{scope}>'.format(name=metadata_key, key=key, scope=self.scope_separator.join(scopes)))
         return unscoped_dict[key]
 
     def remap(self, metadata_key: str, value, write_to_dict: dict):
@@ -266,44 +273,12 @@ class ScopedMetadataMap(MetadataMap):
 
 class MetadataMapV0V1(ScopedMetadataMap):
     _map_v0v1 = {
-        'schema_version': {},
-        'system': {},
-        'time': {},
-        'arguments': {},
-        'params': {},
+        'schema_version': 'schema_version',
+        'system': 'system',
+        'time': 'time',
+        'arguments': 'arguments',
+        'params': 'params'
     }
 
-    def _get_map(self):
+    def _get_scope_map(self):
         return self._map_v0v1
-
-    def map(self, metadata_key, reader: dict):
-        scoped_parts = metadata_key.split('_')
-
-        current_map = self._map
-        prefix_idx = 0
-        scopes = []
-        while prefix_idx < len(scoped_parts):
-            current_prefix = scoped_parts[prefix_idx]
-            if current_prefix in current_map:
-                scopes.append(current_prefix)
-                current_map = current_map[current_prefix]
-                prefix_idx += 1
-            else:
-                break
-
-        unscoped_key = '_'.join(scoped_parts[prefix_idx:])
-
-        if unscoped_key in current_map:
-            key = current_map[unscoped_key]
-        else:
-            key = unscoped_key
-
-        unscoped_dict = reader
-        for scope in scopes:
-            unscoped_dict = unscoped_dict[scope]
-        if key not in unscoped_dict:
-            raise ValueError('Could not map <{name}> which was mapped to {key} with scope {scope}'.format(name=metadata_key, key=key, scope='_'.join(scopes)))
-        return unscoped_dict[key]
-
-    def remap(self, metadata_key: str, value, write_to_dict: dict):
-        scoped_parts = metadata_key.split('_')
