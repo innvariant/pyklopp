@@ -1,4 +1,7 @@
+import json
 import os
+import shlex
+
 import shutil
 
 from cleo import CommandTester, Application
@@ -7,7 +10,7 @@ from pyklopp.console.commands.init import InitCommand
 from pyklopp.console.commands.train import TrainCommand
 
 
-def deactivated_test_success_init_simple_model():
+def test_success_init_simple_model():
     # Arrange
     ## set up application with command
     application = Application()
@@ -20,6 +23,10 @@ def deactivated_test_success_init_simple_model():
     save_path = 'bar-config/model.py'
     dataset_module = 'foo'
     dataset_module_file_path = dataset_module + '.py'
+
+    user_config = {
+        'num_epochs': 3  # Use only few epochs for test
+    }
 
     # clean up possible existing files
     if os.path.exists(module_file_path):
@@ -83,7 +90,7 @@ def get_dataset(**args):
 
     command_train = application.find('train')
     train_tester = CommandTester(command_train)
-    train_tester.execute(save_path + ' ' + dataset_module + '.get_dataset')
+    train_tester.execute(save_path + ' ' + dataset_module + '.get_dataset' + ' --config {json_config}'.format(json_config=shlex.quote(json.dumps(user_config))))
 
     # Cleanup
     os.remove(module_file_path)
