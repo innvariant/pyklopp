@@ -1,5 +1,7 @@
 import os
 import json
+from typing import List
+
 import time
 
 import uuid
@@ -181,6 +183,8 @@ class PropertyObject(object):
                 setattr(prop_obj, attr_name, 0.0)
             elif attr_type == int:
                 setattr(prop_obj, attr_name, 0)
+            elif attr_type == list:
+                setattr(prop_obj, attr_name, [])
             else:
                 name_default_getter = 'get_default'
                 if hasattr(attr_type, name_default_getter):
@@ -203,6 +207,7 @@ class Metadata(PropertyObject):
     system_python_seed_local: int
     system_python_seed_random_lower_bound: int
     system_python_seed_random_upper_bound: int
+    system_loaded_modules: list
 
     time_config_start: float
     time_config_end: float
@@ -349,3 +354,15 @@ def init_metadata(**kwargs):
         setattr(m, name, kwargs[name])
 
     return m
+
+
+def get_mapping(version: semver.Version):
+    raise NotImplementedError
+
+
+def read_metadata(path_to_file: str):
+    if not os.path.exists(path_to_file):
+        raise FileNotFoundError('File not found: %s' % path_to_file)
+    reader = MetadataReader(path_to_file)
+    reader.read()
+    version = reader.schema_version

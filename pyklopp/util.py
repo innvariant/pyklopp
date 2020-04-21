@@ -16,7 +16,12 @@ def count_parameters(model: torch.nn.Module):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-def load_dataset_from_argument(dataset_arg : str, assembled_config : dict) -> torch.utils.data.Dataset:
+def load_into_property_object(prop_obj, kwargs, prefix):
+    for name in kwargs:
+        setattr(prop_obj, prefix+name, kwargs[name])
+
+
+def load_dataset_from_argument(dataset_arg: str, assembled_config: dict) -> torch.utils.data.Dataset:
     """
 
     :param dataset_arg:

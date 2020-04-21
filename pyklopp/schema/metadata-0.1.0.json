@@ -32,6 +32,7 @@
       "type": "object",
       "properties": {
         "global_unique_id": { "type": "string" },
+        "loaded_modules": { "type": "array" },
         "hostname": { "type": "string" },
         "pyklopp_version": { "type": "string" },
         "python_cwd": { "type": "string" },

@@ -5,8 +5,7 @@ from pyklopp.metadata import MetadataReader, MetadataError
 
 
 def test_construct():
-    reader = MetadataReader()
-    #reader.load() TODO
+    MetadataReader()
 
 def test_construct_with_specific_version():
     MetadataReader(version="0.1.0")

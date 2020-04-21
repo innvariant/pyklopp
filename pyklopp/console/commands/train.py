@@ -9,6 +9,8 @@ import torch
 import numpy as np
 import ignite
 
+import pyklopp.metadata as pkmd
+
 from tqdm import tqdm
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import create_supervised_trainer, create_supervised_evaluator, Events
@@ -92,6 +94,9 @@ class TrainCommand(Command):
             'get_loss': 'pyklopp.defaults.get_loss',
             'get_dataset_test': None,
         }
+        # TODO metadata will replace config in future releases
+        metadata = pkmd.init_metadata()
+        metadata.system_loaded_modules = loaded_modules
 
         # Load user-defined configuration
         if self.option('config'):

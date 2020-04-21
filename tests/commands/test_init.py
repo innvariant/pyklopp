@@ -1,3 +1,6 @@
+import json
+import shlex
+
 import pytest
 import os
 import shutil
@@ -5,6 +8,7 @@ import shutil
 from cleo import Application
 from cleo import CommandTester
 
+import pyklopp.metadata as pkmd
 from pyklopp.console.commands.init import InitCommand
 
 
@@ -123,4 +127,50 @@ def get_model(**args):
     shutil.rmtree(os.path.dirname(save_path))
 
 
+def test_success_load_custom_user_config():
+    application = Application()
+    application.add(InitCommand())
+    custom_config = {
+        'batch_size': 512,
+        'device': 'cuda:0',
+        'dataset': 'torch.blah',
+        'learning_rate': 0.2,
+    }
+    # set up file path variables
+    module_name = 'bar'
+    module_file_path = module_name + '.py'
+    save_path = 'bar-config/model.py'
 
+    # clean up possible existing files
+    if os.path.exists(module_file_path):
+        os.remove(module_file_path)
+    if os.path.exists(save_path):
+        shutil.rmtree(os.path.dirname(save_path))
+
+    # write model to file path from which we want to import from
+    content = '''
+import torch
+
+def get_model(**args):
+    return torch.nn.Conv2d(10, 10, 10)
+
+'''
+    with open(module_file_path, 'a') as the_file:
+        the_file.write(content)
+
+    command = application.find('init')
+    command_tester = CommandTester(command)
+
+    # Act
+    command_tester.execute(module_name + ' --config {json_config}'.format(json_config=shlex.quote(json.dumps(custom_config))) + ' --save=' + save_path)
+
+    assert os.path.exists(save_path)
+
+    # Load metadata from saved path
+    # TODO schema validation
+    #reader = pkmd.MetadataReader()
+    #reader.read(os.path.join(os.path.dirname(save_path), 'config.json'))
+
+    # Cleanup
+    os.remove(module_file_path)
+    shutil.rmtree(os.path.dirname(save_path))

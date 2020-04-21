@@ -7,10 +7,11 @@ import time
 import uuid
 import torch.nn
 import numpy as np
+import pyklopp.metadata as pkmd
 
 from cleo import Command
 from pyklopp import __version__, subpackage_import
-from pyklopp.util import count_parameters, save_paths_obtain_and_check, load_custom_config
+from pyklopp.util import count_parameters, save_paths_obtain_and_check, load_custom_config, load_into_property_object
 from pyklopp.loading import load_modules
 
 
@@ -22,7 +23,8 @@ class InitCommand(Command):
         {model : Name of the module with initialization method for the model.}
         {--m|modules=* : Optional modules to load.}
         {--c|config=* : JSON config or path to JSON config file.}
-        {--s|save= : Path to save the model/config to}
+        {--s|save= : Path to save the model to}
+        {--meta= : Path to save the meta information to}
     """
 
     def handle(self):
@@ -64,6 +66,9 @@ class InitCommand(Command):
             'save_path_base': save_path_base,
             'model_persistence_name': model_file_name,  # If later set to None/empty, model will not be persisted
         }
+        # TODO metadata will replace config in future releases
+        metadata = pkmd.init_metadata()
+        metadata.system_loaded_modules = loaded_modules
 
         # Load user-defined configuration
         if self.option('config'):
@@ -71,6 +76,7 @@ class InitCommand(Command):
                 config_option = str(config_option)
                 user_config = load_custom_config(config_option)
                 config.update(user_config)
+                load_into_property_object(metadata, user_config, 'arguments_')
 
         """ ---------------------------
         Dynamic configuration computations.
