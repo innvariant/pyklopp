@@ -18,7 +18,7 @@ from cleo import Command
 
 from pyklopp import __version__, subpackage_import
 from pyklopp.util import load_dataset_from_argument, save_paths_obtain_and_check, load_custom_config
-from pyklopp.loading import load_modules
+from pyklopp.loading import load_modules, add_local_path_to_system
 
 
 class TrainCommand(Command):
@@ -44,9 +44,7 @@ class TrainCommand(Command):
 
         # Add current absolute path to system path to load local modules
         # If initialized a module previously from a local module, then it must be available in path later again
-        add_path = os.path.abspath('.')
-        sys.path.append(add_path)
-        self.info('Added %s to path' % add_path)
+        add_local_path_to_system(self.info)
 
         """
         Optional (local) module to load.

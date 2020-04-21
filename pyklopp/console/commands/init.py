@@ -12,7 +12,7 @@ import pyklopp.metadata as pkmd
 from cleo import Command
 from pyklopp import __version__, subpackage_import
 from pyklopp.util import count_parameters, save_paths_obtain_and_check, load_custom_config, load_into_property_object
-from pyklopp.loading import load_modules
+from pyklopp.loading import load_modules, add_local_path_to_system
 
 
 class InitCommand(Command):
@@ -33,9 +33,7 @@ class InitCommand(Command):
 
         # Add current absolute path to system path
         # This is required for local modules to load.
-        add_path = os.path.abspath('.')
-        sys.path.append(add_path)
-        self.info('Added %s to path' % add_path)
+        add_local_path_to_system(self.info)
 
         """
         Optional (local) module to load.

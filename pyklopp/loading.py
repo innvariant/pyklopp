@@ -5,9 +5,14 @@ import sys
 def subpackage_import(name: str):
     components = name.split('.')
 
-    mod = __import__(components[0])
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
+    try:
+        mod = __import__(components[0])
+        for comp in components[1:]:
+            mod = getattr(mod, comp)
+    except AttributeError as e:
+        raise AttributeError('Could not import <{name}>. System path info: "{syspath}"'.format(
+            name=name, syspath=sys.path
+        ), e)
 
     return mod
 

@@ -18,10 +18,10 @@ def test_success_init_simple_model():
     application.add(TrainCommand())
 
     # set up file path variables
-    module_name = 'bar'
+    module_name = 'module_name_for_training'
     module_file_path = module_name + '.py'
-    save_path = 'bar-config/model.py'
-    dataset_module = 'foo'
+    save_path = 'tmp-train-save-path/model.py'
+    dataset_module = 'tmp_training_dataset'
     dataset_module_file_path = dataset_module + '.py'
 
     user_config = {

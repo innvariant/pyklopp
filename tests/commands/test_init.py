@@ -137,9 +137,9 @@ def test_success_load_custom_user_config():
         'learning_rate': 0.2,
     }
     # set up file path variables
-    module_name = 'bar'
+    module_name = 'tmp_module1_init'
     module_file_path = module_name + '.py'
-    save_path = 'bar-config/model.py'
+    save_path = 'tmp-test-save/model.py'
 
     # clean up possible existing files
     if os.path.exists(module_file_path):
