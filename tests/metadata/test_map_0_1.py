@@ -1,7 +1,7 @@
 import pytest
 import json
 
-from pyklopp.metadata import MetadataMapV0V1, Metadata
+from pyklopp.metadata import MetadataMapV0V1, Metadata, validate_schema
 
 
 def test_construct():
@@ -9,33 +9,12 @@ def test_construct():
 
 
 def test_fill_empty_unstrict():
-    empty_metadata = Metadata()
+    empty_metadata = Metadata.build_fill_default()
+    empty_metadata.schema_version = '0.3.1'
     result = {}
 
     map = MetadataMapV0V1({}, result)
     map.remap_all(empty_metadata)
 
-    print(result)
-
-
-def _test_construct_with_specific_version():
-    reader = MetadataReader()
-    reader.load(json.dumps({
-        'schema_version': '0.1.0',
-        'system': {
-            'foo'
-        }
-    }))
-    mapper = MetadataMapV0V1(reader)
-
-    metadata = Metadata()
-    mapper(metadata)
-
-
-
-def _test_foo():
-    m = MetadataMapV0V1(version="0.1.0")
-
-    m.system_global_unique_id = "abc"
-    assert m.system_global_unique_id == "abc"
+    validate_schema(result, version='0.1.0')
 

@@ -1,6 +1,7 @@
 import os
 import json
 import jsonschema
+import semantic_version as semver
 from importlib_resources import files
 
 latest_version = '0.1.0'
@@ -12,7 +13,7 @@ def load_schema(version=None):
     return json.loads(files('pyklopp').joinpath('schema/metadata-' + version + '.json').read_text())
 
 
-def validate_schema(metadata, schema=None, version=None):
+def validate_schema(metadata: dict, schema=None, version=None):
     if schema is None:
         version = version if version is not None else metadata['schema_version'] if 'schema_version' in metadata else None
         schema = load_schema(version)
@@ -20,7 +21,7 @@ def validate_schema(metadata, schema=None, version=None):
     try:
         jsonschema.validate(instance=metadata, schema=schema)
     except jsonschema.ValidationError as e:
-        raise MetadataError('Could not load metadata file. Did not match the specified schema', e)
+        raise MetadataError('The given metadata does not match the expected schema.', e)
 
     return schema
 
@@ -31,8 +32,13 @@ class MetadataError(Exception):
 
 
 class MappingError(MetadataError):
-   """Base class for other exceptions"""
-   pass
+    def __init__(self, other: Exception, data: dict = None):
+        super(MappingError, self).__init__(other)
+        self._data = data
+
+    def __str__(self):
+        additional = ',\ndata=<%s>' % self._data if self._data is not None else ''
+        return super(MappingError, self).__str__() + additional
 
 
 class AttrDict(dict):
@@ -67,7 +73,9 @@ class MetadataReader(dict):
     def schema_version(self):
         return self._schema_version
 
-    def read(self, validate=True):
+    def read(self, path=None, validate=True):
+        if path is not None:
+            self.path = path
         if self.path is None:
             raise ValueError('You need to specify the metadata path')
 
@@ -156,6 +164,26 @@ class PropertyObject(object):
 
         return Cls
 
+    @classmethod
+    def build_fill_default(clazz):
+        prop_obj = clazz()
+        for attr_name in prop_obj.__annotations__:
+            attr_type = prop_obj.__annotations__[attr_name]
+            if attr_type == str:
+                setattr(prop_obj, attr_name, '')
+            elif attr_type == float:
+                setattr(prop_obj, attr_name, 0.0)
+            elif attr_type == int:
+                setattr(prop_obj, attr_name, 0)
+            else:
+                name_default_getter = 'get_default'
+                if hasattr(attr_type, name_default_getter):
+                    type_def_value = getattr(attr_type, name_default_getter)
+                    setattr(prop_obj, attr_name, type_def_value)
+                else:
+                    raise ValueError('Unknown type <{T}> and could not find a default getter <get> on it to specify a default value.'.format(T=attr_type, get=name_default_getter))
+        return prop_obj
+
 
 @PropertyObject.with_annotated_properties
 class Metadata(PropertyObject):
@@ -168,22 +196,32 @@ class Metadata(PropertyObject):
     system_python_seed_random_lower_bound: int
     system_python_seed_random_upper_bound: int
 
-    time_config_start: int
-    time_config_end: int
-    time_model_init_start: int
-    time_model_init_end: int
-    time_model_save_start: int
-    time_model_save_end: int
+    time_config_start: float
+    time_config_end: float
+    time_model_init_start: float
+    time_model_init_end: float
+    time_model_save_start: float
+    time_model_save_end: float
 
     params_batch_size: int
     params_learning_rate: float
     params_device: str
+
+    arguments_batch_size: int
+    arguments_device: str
 
 
 class MetadataMap(object):
     def __init__(self, read_dict: dict, write_dict: dict):
         self._reader = read_dict
         self._writer = write_dict
+
+    @property
+    def specification(self) -> semver.SimpleSpec:
+        raise NotImplementedError('Your mapping implementation needs to provide a requirement spec for which it agrees with schema versions.')
+
+    def applies(self, version: semver.Version) -> bool:
+        return self.specification.match(version)
 
     @property
     def reader(self):
@@ -229,26 +267,23 @@ class ScopedMetadataMap(MetadataMap):
         current_map = self._get_scope_map()
         prefix_idx = 0
         scopes = []
+        unscoped_reader = reader
         while prefix_idx < len(scoped_parts):
             current_prefix = scoped_parts[prefix_idx]
-            if current_prefix in current_map:
-                scopes.append(current_prefix)
+            if current_prefix in current_map and current_prefix in unscoped_reader:
+                unscoped_reader = unscoped_reader[current_prefix]
                 current_map = current_map[current_prefix]
+                scopes.append(current_prefix)
                 prefix_idx += 1
             else:
-                break
-
-        unscoped_key = self.scope_separator.join(scoped_parts[prefix_idx:])
-        key = current_map[unscoped_key] if unscoped_key in current_map else unscoped_key
-
-        unscoped_dict = reader
-        for scope in scopes:
-            #print('Scope: ', scope)
-            #print(unscoped_dict)
-            unscoped_dict = unscoped_dict[scope]
-        if key not in unscoped_dict:
-            raise MappingError('Did not find <{name}> which was mapped to <{key}> with scope <{scope}>'.format(name=metadata_key, key=key, scope=self.scope_separator.join(scopes)))
-        return unscoped_dict[key]
+                unscoped_key = self.scope_separator.join(scoped_parts[prefix_idx:])
+                key = current_map[unscoped_key] if unscoped_key in current_map else unscoped_key
+                if key not in unscoped_reader:
+                    raise MappingError('Did not find <{name}> which was mapped to <{key}> with scope <{scope}>'.format(
+                        name=metadata_key, key=key, scope=self.scope_separator.join(scopes)),
+                        data=reader
+                    )
+                return unscoped_reader[key]
 
     def remap(self, metadata_key: str, value, write_to_dict: dict):
         scoped_parts = metadata_key.split(self.scope_separator)
@@ -279,6 +314,10 @@ class MetadataMapV0V1(ScopedMetadataMap):
         'arguments': 'arguments',
         'params': 'params'
     }
+
+    @property
+    def specification(self) -> semver.SimpleSpec:
+        return semver.SimpleSpec('>=0.1.0,<0.2.0')
 
     def _get_scope_map(self):
         return self._map_v0v1
