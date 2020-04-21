@@ -14,7 +14,8 @@ from ignite.engine import create_supervised_evaluator
 from cleo import Command
 
 from pyklopp import __version__, subpackage_import
-from pyklopp.util import load_modules, load_dataset_from_argument, add_local_path_to_system
+from pyklopp.util import load_dataset_from_argument
+from pyklopp.loading import add_local_path_to_system, load_modules
 
 
 class EvalCommand(Command):

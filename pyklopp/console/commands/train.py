@@ -15,7 +15,8 @@ from ignite.engine import create_supervised_trainer, create_supervised_evaluator
 from cleo import Command
 
 from pyklopp import __version__, subpackage_import
-from pyklopp.util import load_modules, load_dataset_from_argument, save_paths_obtain_and_check, load_custom_config
+from pyklopp.util import load_dataset_from_argument, save_paths_obtain_and_check, load_custom_config
+from pyklopp.loading import load_modules
 
 
 class TrainCommand(Command):

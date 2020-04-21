@@ -9,9 +9,9 @@ import torch.nn
 import numpy as np
 
 from cleo import Command
-from pyklopp import __version__
-from pyklopp import subpackage_import
-from pyklopp.util import count_parameters, save_paths_obtain_and_check, load_modules, load_custom_config
+from pyklopp import __version__, subpackage_import
+from pyklopp.util import count_parameters, save_paths_obtain_and_check, load_custom_config
+from pyklopp.loading import load_modules
 
 
 class InitCommand(Command):
