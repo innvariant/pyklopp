@@ -1,8 +1,14 @@
 import os
 import json
+import time
+
+import uuid
+
 import jsonschema
 import semantic_version as semver
 from importlib_resources import files
+
+from pyklopp import __version__
 
 latest_version = '0.1.0'
 
@@ -188,7 +194,9 @@ class PropertyObject(object):
 @PropertyObject.with_annotated_properties
 class Metadata(PropertyObject):
     schema_version: str
+
     system_global_unique_id: str
+    system_hostname: str
     system_pyklopp_version: str
     system_python_cwd: str
     system_python_seed_initial: int
@@ -209,6 +217,7 @@ class Metadata(PropertyObject):
 
     arguments_batch_size: int
     arguments_device: str
+    arguments_dataset: str
 
 
 class MetadataMap(object):
@@ -305,7 +314,6 @@ class ScopedMetadataMap(MetadataMap):
                 break
 
 
-
 class MetadataMapV0V1(ScopedMetadataMap):
     _map_v0v1 = {
         'schema_version': 'schema_version',
@@ -321,3 +329,23 @@ class MetadataMapV0V1(ScopedMetadataMap):
 
     def _get_scope_map(self):
         return self._map_v0v1
+
+
+def init_metadata(**kwargs):
+    m = Metadata.build_fill_default()
+    m.schema_version = latest_version
+
+    m.system_global_unique_id = str(uuid.uuid4())
+    m.system_pyklopp_version = __version__
+    m.system_python_cwd = os.getcwd()
+    m.system_python_seed_initial = None
+    m.system_python_seed_local = None
+    m.system_python_seed_random_lower_bound = 0
+    m.system_python_seed_random_upper_bound = 10000
+
+    m.time_config_start = time.time()
+
+    for name in kwargs:
+        setattr(m, name, kwargs[name])
+
+    return m

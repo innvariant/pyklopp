@@ -10,11 +10,13 @@
       "type": "object",
       "properties": {
         "batch_size": { "type": "number" },
-        "device": { "type": "string" }
+        "device": { "type": "string" },
+        "dataset": { "type": "string" }
       },
       "required": [
         "batch_size",
-        "device"
+        "device",
+        "dataset"
       ]
     },
     "init": {
@@ -30,6 +32,7 @@
       "type": "object",
       "properties": {
         "global_unique_id": { "type": "string" },
+        "hostname": { "type": "string" },
         "pyklopp_version": { "type": "string" },
         "python_cwd": { "type": "string" },
         "python_seed_initial": { "type": "number" },
@@ -38,6 +41,9 @@
         "python_seed_random_upper_bound": { "type": "number" }
       },
       "required": [
+        "global_unique_id",
+        "hostname",
+        "pyklopp_version",
         "python_cwd",
         "python_seed_initial",
         "python_seed_local",
