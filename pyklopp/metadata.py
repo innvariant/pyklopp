@@ -4,10 +4,10 @@ import time
 import uuid
 
 import jsonschema
+
 import semantic_version as semver
 
 from importlib_resources import files
-
 from pyklopp import __version__
 
 

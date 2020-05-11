@@ -5,13 +5,13 @@ import socket
 import time
 import uuid
 
-import ignite
 import numpy as np
+
+import ignite
 import torch
 
 from cleo import Command
 from ignite.engine import create_supervised_evaluator
-
 from pyklopp import __version__
 from pyklopp import subpackage_import
 from pyklopp.loading import add_local_path_to_system

@@ -7,7 +7,6 @@ import pytest
 
 from cleo import Application
 from cleo import CommandTester
-
 from pyklopp.console.commands.init import InitCommand
 
 

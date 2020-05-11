@@ -5,8 +5,10 @@ import socket
 import time
 import uuid
 
-import ignite
 import numpy as np
+
+import ignite
+import pyklopp.metadata as pkmd
 import torch
 
 from cleo import Command
@@ -14,9 +16,6 @@ from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Events
 from ignite.engine import create_supervised_evaluator
 from ignite.engine import create_supervised_trainer
-
-import pyklopp.metadata as pkmd
-
 from pyklopp import __version__
 from pyklopp import subpackage_import
 from pyklopp.loading import add_local_path_to_system

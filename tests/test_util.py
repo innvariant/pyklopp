@@ -2,11 +2,11 @@ import os
 
 from unittest.mock import Mock
 
-import cleo
 import pytest
 
-from pyfakefs.fake_filesystem import FakeFilesystem
+import cleo
 
+from pyfakefs.fake_filesystem import FakeFilesystem
 from pyklopp.util import build_default_config
 from pyklopp.util import save_paths_obtain_and_check
 
