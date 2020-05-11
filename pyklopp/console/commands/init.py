@@ -12,9 +12,12 @@ import torch.nn
 from cleo import Command
 from pyklopp import __version__, subpackage_import
 from pyklopp.loading import add_local_path_to_system, load_modules
-from pyklopp.util import (count_parameters, load_custom_config,
-                          load_into_property_object,
-                          save_paths_obtain_and_check)
+from pyklopp.util import (
+    count_parameters,
+    load_custom_config,
+    load_into_property_object,
+    save_paths_obtain_and_check,
+)
 
 
 class InitCommand(Command):

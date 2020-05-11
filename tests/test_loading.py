@@ -1,8 +1,11 @@
 import os
 
 import pytest
-from pyklopp.loading import (add_local_path_to_system, load_modules,
-                             remove_local_path_from_system)
+from pyklopp.loading import (
+    add_local_path_to_system,
+    load_modules,
+    remove_local_path_from_system,
+)
 
 
 def test_load_modules():
