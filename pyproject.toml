@@ -52,7 +52,7 @@ lines_between_types = 1
 multi_line_output = 3
 use_parentheses = true
 not_skip = "__init__.py"
-skip_glob = ["*/setup.py"]
+skip_glob = ["*/setup.py", "res/"]
 filter_files = true
 
 [build-system]
