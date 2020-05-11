@@ -1,6 +1,3 @@
-import json
-
-import pytest
 from pyklopp.metadata import Metadata, MetadataMapV0V1, validate_schema
 
 

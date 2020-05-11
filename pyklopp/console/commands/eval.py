@@ -2,7 +2,6 @@ import json
 import os
 import random
 import socket
-import sys
 import time
 import uuid
 
@@ -11,7 +10,6 @@ import numpy as np
 import ignite
 import torch
 from cleo import Command
-from ignite.contrib.handlers import ProgressBar
 from ignite.engine import create_supervised_evaluator
 from pyklopp import __version__, subpackage_import
 from pyklopp.loading import add_local_path_to_system, load_modules
@@ -40,16 +38,15 @@ class EvalCommand(Command):
             raise ValueError('No model file found on "%s"' % model_path)
 
         # Early check for save path
-        existing_config = None
         save_path_base = None
-        config_file_name = None
+        # config_file_name = None
         if self.option("save"):
             save_path = str(self.option("save"))
             if os.path.exists(save_path):
                 with open(save_path, "r") as handle:
-                    existing_config = json.load(handle)
+                    json.load(handle)
 
-            config_file_name = os.path.basename(save_path)
+            # config_file_name = os.path.basename(save_path)
             save_path_base = os.path.dirname(save_path)
             if not os.path.isdir(save_path_base):
                 os.makedirs(save_path_base)
@@ -140,7 +137,7 @@ class EvalCommand(Command):
             num_workers=2,
         )
         dataiter = iter(dataset_loader)
-        initial_features, initial_labels = dataiter.next()
+        dataiter.next()  # load at least one item to invoke having it into memory
         config["time_dataset_loading_end"] = time.time()
 
         # Determine device to use (e.g. cpu, gpu:0, gpu:1, ..)

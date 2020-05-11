@@ -1,5 +1,4 @@
-import pytest
-from pyklopp.metadata import *
+from pyklopp.metadata import Metadata
 
 
 def test_metadata_construct():

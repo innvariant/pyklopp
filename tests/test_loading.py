@@ -36,7 +36,7 @@ def test_load_modules_error_non_existing_module_file():
 
     loaded = load_modules([non_existing_module_name])
 
-    assert len(loaded) is 0
+    assert len(loaded) == 0
 
     # Cleanup
     remove_local_path_from_system()

@@ -2,7 +2,6 @@ import json
 import os
 import time
 import uuid
-from typing import List
 
 import jsonschema
 
@@ -402,4 +401,4 @@ def read_metadata(path_to_file: str):
         raise FileNotFoundError("File not found: %s" % path_to_file)
     reader = MetadataReader(path_to_file)
     reader.read()
-    version = reader.schema_version
+    # version = reader.schema_version

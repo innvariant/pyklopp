@@ -59,7 +59,7 @@ def load_dataset_from_argument(
 
     # Assume argument to be s.th. like 'torchvision.datasets.cifar.CIFAR10'
     if dataset_module_file_name is None:
-        if not "." in dataset_arg:
+        if "." not in dataset_arg:
             raise ValueError(
                 "Dataset must be an attribute of a module. Expecting at least one dot."
             )

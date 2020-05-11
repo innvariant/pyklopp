@@ -1,5 +1,10 @@
 import torch
 
+try:  # TODO remove optional package pypaddle
+    import pypaddle
+except ImportError:
+    pypaddle = None
+
 
 class Initializer(object):
     def __call__(self, module: torch.nn.Module):

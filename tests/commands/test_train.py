@@ -10,7 +10,7 @@ from pyklopp.console.commands.train import TrainCommand
 
 def test_success_init_simple_model():
     # Arrange
-    ## set up application with command
+    # set up application with command
     application = Application()
     application.add(InitCommand())
     application.add(TrainCommand())

@@ -3,7 +3,6 @@ import os
 import shlex
 import shutil
 
-import pyklopp.metadata as pkmd
 import pytest
 from cleo import Application, CommandTester
 from pyklopp.console.commands.init import InitCommand
@@ -88,7 +87,7 @@ def init(**args):
 
 def test_success_init_simple_model():
     # Arrange
-    ## set up application with command
+    # set up application with command
     application = Application()
     application.add(InitCommand())
 

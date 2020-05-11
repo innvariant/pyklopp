@@ -2,7 +2,6 @@ import json
 import os
 import random
 import socket
-import sys
 import time
 import uuid
 
@@ -19,7 +18,6 @@ from pyklopp import __version__, subpackage_import
 from pyklopp.loading import add_local_path_to_system, load_modules
 from pyklopp.util import (load_custom_config, load_dataset_from_argument,
                           save_paths_obtain_and_check)
-from tqdm import tqdm
 
 
 class TrainCommand(Command):
@@ -57,9 +55,9 @@ class TrainCommand(Command):
         """
         Load dataset module file
         """
-        dataset = None  # will be the dataset class, should be of type 'torch.utils.data.Dataset'
-        fn_get_dataset = None  # optional function to load the dataset based on the allocated configuration
-        class_dataset = None  # optional class which will be instanatiated with the configuration sub key 'dataset_config'
+        # `dataset` will be the dataset class, should be of type 'torch.utils.data.Dataset'
+        # `fn_get_dataset` optional function to load the dataset based on the allocated configuration
+        # `class_dataset` optional class which will be instanatiated with the configuration sub key 'dataset_config'
 
         # Either 'my_dataset' / 'my_dataset.py' or s.th. like 'torchvision.datasets.cifar.CIFAR10' or 'torchvision.datasets.mnist.MNIST'
         dataset_argument = str(self.argument("dataset"))

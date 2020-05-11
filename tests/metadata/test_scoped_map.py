@@ -1,4 +1,3 @@
-import pytest
 from pyklopp.metadata import PropertyObject, ScopedMetadataMap
 
 
