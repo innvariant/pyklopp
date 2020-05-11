@@ -1,11 +1,9 @@
-import torchvision
 import torch
+import torchvision
 
 
 def get_transform(**kwargs):
-    return torchvision.transforms.Compose([
-        torchvision.transforms.ToTensor()
-    ])
+    return torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
 
 
 def get_optimizer(parameters, learning_rate, **kwargs):

@@ -1,42 +1,49 @@
-import os
 import json
+import os
+import time
+import uuid
 from typing import List
 
-import time
-
-import uuid
-
 import jsonschema
+
 import semantic_version as semver
 from importlib_resources import files
-
 from pyklopp import __version__
 
-latest_version = '0.1.0'
+latest_version = "0.1.0"
 
 
 def load_schema(version=None):
     if version is None:
         version = latest_version
-    return json.loads(files('pyklopp').joinpath('schema/metadata-' + version + '.json').read_text())
+    return json.loads(
+        files("pyklopp").joinpath("schema/metadata-" + version + ".json").read_text()
+    )
 
 
 def validate_schema(metadata: dict, schema=None, version=None):
     if schema is None:
-        version = version if version is not None else metadata['schema_version'] if 'schema_version' in metadata else None
+        version = (
+            version
+            if version is not None
+            else metadata["schema_version"]
+            if "schema_version" in metadata
+            else None
+        )
         schema = load_schema(version)
 
     try:
         jsonschema.validate(instance=metadata, schema=schema)
     except jsonschema.ValidationError as e:
-        raise MetadataError('The given metadata does not match the expected schema.', e)
+        raise MetadataError("The given metadata does not match the expected schema.", e)
 
     return schema
 
 
 class MetadataError(Exception):
-   """Base class for other exceptions"""
-   pass
+    """Base class for other exceptions"""
+
+    pass
 
 
 class MappingError(MetadataError):
@@ -45,7 +52,7 @@ class MappingError(MetadataError):
         self._data = data
 
     def __str__(self):
-        additional = ',\ndata=<%s>' % self._data if self._data is not None else ''
+        additional = ",\ndata=<%s>" % self._data if self._data is not None else ""
         return super(MappingError, self).__str__() + additional
 
 
@@ -61,7 +68,9 @@ class MetadataReader(dict):
     _schema = None
     _schema_version = None
 
-    def __init__(self, version: str = None, path_json_file=None, schema: str = None, **kwargs):
+    def __init__(
+        self, version: str = None, path_json_file=None, schema: str = None, **kwargs
+    ):
         super().__init__(**kwargs)
         self._path_json_file = path_json_file
         self._schema_version = version
@@ -74,7 +83,9 @@ class MetadataReader(dict):
     @path.setter
     def path(self, path):
         if self._path_json_file is not None:
-            raise ValueError('Use one metadata object per metadata file and do not overwrite objects with new paths.')
+            raise ValueError(
+                "Use one metadata object per metadata file and do not overwrite objects with new paths."
+            )
         self._path_json_file = path
 
     @property
@@ -85,9 +96,9 @@ class MetadataReader(dict):
         if path is not None:
             self.path = path
         if self.path is None:
-            raise ValueError('You need to specify the metadata path')
+            raise ValueError("You need to specify the metadata path")
 
-        with open(self.path, 'r') as read_handle:
+        with open(self.path, "r") as read_handle:
             file_props = json.load(read_handle)
 
         if validate:
@@ -108,15 +119,17 @@ class MetadataReader(dict):
 
     def save(self, validate=True):
         if validate:
-            validate_schema(self._props, schema=self._schema, version=self._schema_version)
+            validate_schema(
+                self._props, schema=self._schema, version=self._schema_version
+            )
 
-        with open(self._path_json_file, 'w+') as write_handle:
+        with open(self._path_json_file, "w+") as write_handle:
             json.dump(self._props, write_handle)
 
     def __getitem__(self, item):
         if item in self._props:
             return self._props[item]
-        raise MetadataError('Unknown metadata keyword <{name}>'.format(name=item))
+        raise MetadataError("Unknown metadata keyword <{name}>".format(name=item))
 
     def __setitem__(self, key, value):
         self._props[key] = value
@@ -125,23 +138,23 @@ class MetadataReader(dict):
         if item in self._props:
             value = self._props[item]
             return AttrDict(value) if type(value) is dict else value
-        raise MetadataError('Unknown metadata keyword <{name}>'.format(name=item))
+        raise MetadataError("Unknown metadata keyword <{name}>".format(name=item))
 
 
 def with_annotated_properties(Cls):
     for attr_name in Cls.__annotations__:
 
         def getter(self, name=attr_name):
-            class_prop_key = '_' + name
+            class_prop_key = "_" + name
             return getattr(self, class_prop_key)
 
         def setter(self, value, name=attr_name):
-            class_prop_key = '_' + name
+            class_prop_key = "_" + name
             setattr(self, class_prop_key, value)
 
         prop = property(getter, setter)
-        class_prop_key = '_' + attr_name
-        #prop = property(lambda self: self._get_default(key, None)).setter(lambda self, value: self._set(key, value))
+        class_prop_key = "_" + attr_name
+        # prop = property(lambda self: self._get_default(key, None)).setter(lambda self, value: self._set(key, value))
         setattr(Cls, attr_name, prop)
         setattr(Cls, class_prop_key, None)
 
@@ -150,23 +163,27 @@ def with_annotated_properties(Cls):
 
 class PropertyObject(object):
     def properties(self):
-        return [name for name in dir(self) if not name.startswith('_') and not callable(getattr(self, name))]
+        return [
+            name
+            for name in dir(self)
+            if not name.startswith("_") and not callable(getattr(self, name))
+        ]
 
     @classmethod
     def with_annotated_properties(clazz, Cls):
         for attr_name in Cls.__annotations__:
 
             def getter(self, name=attr_name):
-                class_prop_key = '_' + name
+                class_prop_key = "_" + name
                 return getattr(self, class_prop_key)
 
             def setter(self, value, name=attr_name):
-                class_prop_key = '_' + name
+                class_prop_key = "_" + name
                 setattr(self, class_prop_key, value)
 
             prop = property(getter, setter)
-            class_prop_key = '_' + attr_name
-            #prop = property(lambda self: self._get_default(key, None)).setter(lambda self, value: self._set(key, value))
+            class_prop_key = "_" + attr_name
+            # prop = property(lambda self: self._get_default(key, None)).setter(lambda self, value: self._set(key, value))
             setattr(Cls, attr_name, prop)
             setattr(Cls, class_prop_key, None)
 
@@ -178,7 +195,7 @@ class PropertyObject(object):
         for attr_name in prop_obj.__annotations__:
             attr_type = prop_obj.__annotations__[attr_name]
             if attr_type == str:
-                setattr(prop_obj, attr_name, '')
+                setattr(prop_obj, attr_name, "")
             elif attr_type == float:
                 setattr(prop_obj, attr_name, 0.0)
             elif attr_type == int:
@@ -186,12 +203,16 @@ class PropertyObject(object):
             elif attr_type == list:
                 setattr(prop_obj, attr_name, [])
             else:
-                name_default_getter = 'get_default'
+                name_default_getter = "get_default"
                 if hasattr(attr_type, name_default_getter):
                     type_def_value = getattr(attr_type, name_default_getter)
                     setattr(prop_obj, attr_name, type_def_value)
                 else:
-                    raise ValueError('Unknown type <{T}> and could not find a default getter <get> on it to specify a default value.'.format(T=attr_type, get=name_default_getter))
+                    raise ValueError(
+                        "Unknown type <{T}> and could not find a default getter <get> on it to specify a default value.".format(
+                            T=attr_type, get=name_default_getter
+                        )
+                    )
         return prop_obj
 
 
@@ -232,7 +253,9 @@ class MetadataMap(object):
 
     @property
     def specification(self) -> semver.SimpleSpec:
-        raise NotImplementedError('Your mapping implementation needs to provide a requirement spec for which it agrees with schema versions.')
+        raise NotImplementedError(
+            "Your mapping implementation needs to provide a requirement spec for which it agrees with schema versions."
+        )
 
     def applies(self, version: semver.Version) -> bool:
         return self.specification.match(version)
@@ -270,10 +293,12 @@ class MetadataMap(object):
 class ScopedMetadataMap(MetadataMap):
     @property
     def scope_separator(self) -> str:
-        return '_'
+        return "_"
 
     def _get_scope_map(self):
-        raise NotImplementedError('You need to define a mapper which translates a scoping from flat to dict')
+        raise NotImplementedError(
+            "You need to define a mapper which translates a scoping from flat to dict"
+        )
 
     def map(self, metadata_key, reader: dict):
         scoped_parts = metadata_key.split(self.scope_separator)
@@ -291,11 +316,19 @@ class ScopedMetadataMap(MetadataMap):
                 prefix_idx += 1
             else:
                 unscoped_key = self.scope_separator.join(scoped_parts[prefix_idx:])
-                key = current_map[unscoped_key] if unscoped_key in current_map else unscoped_key
+                key = (
+                    current_map[unscoped_key]
+                    if unscoped_key in current_map
+                    else unscoped_key
+                )
                 if key not in unscoped_reader:
-                    raise MappingError('Did not find <{name}> which was mapped to <{key}> with scope <{scope}>'.format(
-                        name=metadata_key, key=key, scope=self.scope_separator.join(scopes)),
-                        data=reader
+                    raise MappingError(
+                        "Did not find <{name}> which was mapped to <{key}> with scope <{scope}>".format(
+                            name=metadata_key,
+                            key=key,
+                            scope=self.scope_separator.join(scopes),
+                        ),
+                        data=reader,
                     )
                 return unscoped_reader[key]
 
@@ -314,23 +347,27 @@ class ScopedMetadataMap(MetadataMap):
                 prefix_idx += 1
             else:
                 unscoped_key = self.scope_separator.join(scoped_parts[prefix_idx:])
-                key = current_map[unscoped_key] if unscoped_key in current_map else unscoped_key
+                key = (
+                    current_map[unscoped_key]
+                    if unscoped_key in current_map
+                    else unscoped_key
+                )
                 unscoped[key] = value
                 break
 
 
 class MetadataMapV0V1(ScopedMetadataMap):
     _map_v0v1 = {
-        'schema_version': 'schema_version',
-        'system': 'system',
-        'time': 'time',
-        'arguments': 'arguments',
-        'params': 'params'
+        "schema_version": "schema_version",
+        "system": "system",
+        "time": "time",
+        "arguments": "arguments",
+        "params": "params",
     }
 
     @property
     def specification(self) -> semver.SimpleSpec:
-        return semver.SimpleSpec('>=0.1.0,<0.2.0')
+        return semver.SimpleSpec(">=0.1.0,<0.2.0")
 
     def _get_scope_map(self):
         return self._map_v0v1
@@ -362,7 +399,7 @@ def get_mapping(version: semver.Version):
 
 def read_metadata(path_to_file: str):
     if not os.path.exists(path_to_file):
-        raise FileNotFoundError('File not found: %s' % path_to_file)
+        raise FileNotFoundError("File not found: %s" % path_to_file)
     reader = MetadataReader(path_to_file)
     reader.read()
     version = reader.schema_version

@@ -25,12 +25,17 @@ Then you can use the built package and install it with pip in your current envir
 
 
 # Defining model & dataset
-Specify your model in a plain python file, e.g.:
+Used imports:
 ```python
-# my_model.py
+import pypaddle.sparse
+import pypaddle.util
 import torch.nn as nn
 import torch.nn.functional as F
 
+```
+Specify your model in a plain python file, e.g.:
+```python
+# my_model.py
 
 # Your model can be any pytorch module
 # Make sure to not define it locally (e.g. within the get_model()-function)
@@ -83,7 +88,6 @@ pyklopp train path/to/mymodel.pth mnist --config='{"batch_size": 100, "learning_
 
 ```python
 # foo.py - Your model initialization function
-import pypaddle.sparse
 
 def init(**kwargs):
     input_size = kwargs['input_size']
@@ -94,8 +98,6 @@ def init(**kwargs):
 
 ```python
 # mnist.py - Your dataset loading functions
-import pypaddle.util
-
 
 def train_loader(**kwargs):
     batch_size = kwargs['batch_size']
