@@ -4,7 +4,7 @@
 
 ## 0.3
 **Important:**
-* IMPORTANT: the *config* will deprecate and be replaced by a schema-based meta-file
+* IMPORTANT: the *config* will deprecate in subsequent versions and will be replaced by a schema-based meta-file
 * introduced a first version of a meta-info-schema
 * introduced a new mandatory parameter *meta* which will determine the path to the meta information file
 
