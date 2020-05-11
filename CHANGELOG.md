@@ -2,6 +2,9 @@
 
 # Development Version
 
+## 0.4
+* introduced pre-commit hooks and added linting
+
 ## 0.3
 **Important:**
 * IMPORTANT: the *config* will deprecate in subsequent versions and will be replaced by a schema-based meta-file
