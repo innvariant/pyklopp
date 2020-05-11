@@ -1,4 +1,5 @@
 from cleo import Application as BaseApplication
+
 from pyklopp import __version__
 
 from .commands.eval import EvalCommand

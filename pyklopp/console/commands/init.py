@@ -6,11 +6,12 @@ import time
 import uuid
 
 import numpy as np
-
-import pyklopp.metadata as pkmd
 import torch.nn
 
 from cleo import Command
+
+import pyklopp.metadata as pkmd
+
 from pyklopp import __version__
 from pyklopp import subpackage_import
 from pyklopp.loading import add_local_path_to_system
