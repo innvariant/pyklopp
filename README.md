@@ -1,4 +1,4 @@
-# pyklopp
+# pyklopp ![Tests](https://github.com/innvariant/pyklopp/workflows/Tests/badge.svg)
 Tired of logging all hyperparameter configurations of your model prototyping to disk?
 
 Pyklopp is a tool to initialize, train and evaluate pytorch models (currently for supervised problems).
