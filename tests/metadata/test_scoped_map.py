@@ -1,4 +1,5 @@
-from pyklopp.metadata import PropertyObject, ScopedMetadataMap
+from pyklopp.metadata import PropertyObject
+from pyklopp.metadata import ScopedMetadataMap
 
 
 @PropertyObject.with_annotated_properties

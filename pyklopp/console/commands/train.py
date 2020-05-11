@@ -10,16 +10,19 @@ import numpy as np
 import ignite
 import pyklopp.metadata as pkmd
 import torch
+
 from cleo import Command
 from ignite.contrib.handlers import ProgressBar
-from ignite.engine import Events, create_supervised_evaluator, create_supervised_trainer
-from pyklopp import __version__, subpackage_import
-from pyklopp.loading import add_local_path_to_system, load_modules
-from pyklopp.util import (
-    load_custom_config,
-    load_dataset_from_argument,
-    save_paths_obtain_and_check,
-)
+from ignite.engine import Events
+from ignite.engine import create_supervised_evaluator
+from ignite.engine import create_supervised_trainer
+from pyklopp import __version__
+from pyklopp import subpackage_import
+from pyklopp.loading import add_local_path_to_system
+from pyklopp.loading import load_modules
+from pyklopp.util import load_custom_config
+from pyklopp.util import load_dataset_from_argument
+from pyklopp.util import save_paths_obtain_and_check
 
 
 class TrainCommand(Command):

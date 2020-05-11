@@ -7,7 +7,9 @@ import warnings
 
 import cleo
 import torch
-from pyklopp import __version__, subpackage_import
+
+from pyklopp import __version__
+from pyklopp import subpackage_import
 from pyklopp.loading import add_local_path_to_system
 
 

@@ -6,8 +6,10 @@ import uuid
 import jsonschema
 
 import semantic_version as semver
+
 from importlib_resources import files
 from pyklopp import __version__
+
 
 latest_version = "0.1.0"
 

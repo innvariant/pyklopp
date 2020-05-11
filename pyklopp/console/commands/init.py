@@ -9,15 +9,16 @@ import numpy as np
 
 import pyklopp.metadata as pkmd
 import torch.nn
+
 from cleo import Command
-from pyklopp import __version__, subpackage_import
-from pyklopp.loading import add_local_path_to_system, load_modules
-from pyklopp.util import (
-    count_parameters,
-    load_custom_config,
-    load_into_property_object,
-    save_paths_obtain_and_check,
-)
+from pyklopp import __version__
+from pyklopp import subpackage_import
+from pyklopp.loading import add_local_path_to_system
+from pyklopp.loading import load_modules
+from pyklopp.util import count_parameters
+from pyklopp.util import load_custom_config
+from pyklopp.util import load_into_property_object
+from pyklopp.util import save_paths_obtain_and_check
 
 
 class InitCommand(Command):

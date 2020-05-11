@@ -1,5 +1,6 @@
 import torch
 
+
 try:  # TODO remove optional package pypaddle
     import pypaddle
 except ImportError:

@@ -1,7 +1,9 @@
 import json
 
 import pytest
-from pyklopp.metadata import MetadataError, MetadataReader
+
+from pyklopp.metadata import MetadataError
+from pyklopp.metadata import MetadataReader
 
 
 def test_construct():

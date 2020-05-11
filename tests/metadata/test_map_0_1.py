@@ -1,4 +1,6 @@
-from pyklopp.metadata import Metadata, MetadataMapV0V1, validate_schema
+from pyklopp.metadata import Metadata
+from pyklopp.metadata import MetadataMapV0V1
+from pyklopp.metadata import validate_schema
 
 
 def test_construct():
