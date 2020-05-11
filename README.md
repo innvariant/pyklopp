@@ -5,6 +5,15 @@ Pyklopp is a tool to initialize, train and evaluate pytorch models (currently fo
 It persists all relevant hyperparameters, timings and model configurations.
 Your prototyping is reduced to defining your model, the dataset and your desired parameters.
 
+**Important note:** we are undergoing an architectural change from writing config json files to writing meta data files given a jsonschema.
+So to keep your experiments reproducible and program against a current design of pyklopp, reference the exact pyklopp version in your experiment.
+E.g. for your *environment.yml*:
+```yaml
+dependencies:
+- pip:
+  - pyklopp==0.3.0
+```
+
 ![Workflow sketch for developing a model and running it with pyklopp.](res/approach.png)
 
 
