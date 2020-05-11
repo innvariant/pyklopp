@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+
+  "definitions": {
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "batch_size": { "type": "number" },
+        "device": { "type": "string" },
+        "dataset": { "type": "string" }
+      },
+      "required": [
+        "batch_size",
+        "device",
+        "dataset"
+      ]
+    },
+    "init": {
+      "type": "object",
+      "properties": {
+        "street_address": { "type": "string" },
+        "city":           { "type": "string" },
+        "state":          { "type": "string" }
+      },
+      "required": ["street_address", "city", "state"]
+    },
+    "system": {
+      "type": "object",
+      "properties": {
+        "global_unique_id": { "type": "string" },
+        "loaded_modules": { "type": "array" },
+        "hostname": { "type": "string" },
+        "pyklopp_version": { "type": "string" },
+        "python_cwd": { "type": "string" },
+        "python_seed_initial": { "type": "number" },
+        "python_seed_local": { "type": "number" },
+        "python_seed_random_lower_bound": { "type": "number" },
+        "python_seed_random_upper_bound": { "type": "number" }
+      },
+      "required": [
+        "global_unique_id",
+        "hostname",
+        "pyklopp_version",
+        "python_cwd",
+        "python_seed_initial",
+        "python_seed_local",
+        "python_seed_random_lower_bound",
+        "python_seed_random_upper_bound"
+      ]
+    },
+    "time": {
+      "type": "object",
+      "properties": {
+        "config_start": { "type": "number" },
+        "config_end": { "type": "number" },
+        "model_init_start": { "type": "number" },
+        "model_init_end": { "type": "number" },
+        "model_save_start": { "type": "number" },
+        "model_save_end": { "type": "number" }
+      },
+      "required": [
+        "config_start",
+        "config_end",
+        "model_init_start",
+        "model_init_end",
+        "model_save_start",
+        "model_save_end"
+      ]
+    },
+    "params": {
+      "type": "object",
+      "properties": {
+        "batch_size": { "type": "number" },
+        "learning_rate": { "type": "number" },
+        "device": { "type": "string" }
+      },
+      "required": [
+        "batch_size",
+        "learning_rate",
+        "device"
+      ]
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "schema_version": { "$ref": "#/definitions/version" },
+    "system": { "$ref": "#/definitions/system" },
+    "time": { "$ref": "#/definitions/time" },
+    "arguments": { "$ref": "#/definitions/arguments" },
+    "params": { "$ref": "#/definitions/params" }
+  },
+  "required": [
+    "schema_version",
+    "system",
+    "time",
+    "arguments",
+    "params"
+  ]
+}

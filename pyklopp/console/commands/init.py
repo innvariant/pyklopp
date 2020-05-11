@@ -7,11 +7,12 @@ import time
 import uuid
 import torch.nn
 import numpy as np
+import pyklopp.metadata as pkmd
 
 from cleo import Command
-from pyklopp import __version__
-from pyklopp import subpackage_import
-from pyklopp.util import count_parameters
+from pyklopp import __version__, subpackage_import
+from pyklopp.util import count_parameters, save_paths_obtain_and_check, load_custom_config, load_into_property_object
+from pyklopp.loading import load_modules, add_local_path_to_system
 
 
 class InitCommand(Command):
@@ -22,48 +23,24 @@ class InitCommand(Command):
         {model : Name of the module with initialization method for the model.}
         {--m|modules=* : Optional modules to load.}
         {--c|config=* : JSON config or path to JSON config file.}
-        {--s|save= : Path to save the model/config to}
+        {--s|save= : Path to save the model to}
+        {--meta= : Path to save the meta information to}
     """
 
     def handle(self):
         # Early check for save path
-        save_path_base = None
-        model_file_name = None
-        if self.option('save'):
-            save_path = str(self.option('save'))
-            model_file_name = os.path.basename(save_path)
-            save_path_base = os.path.dirname(save_path)
-            if len(save_path_base) < 1:
-                raise ValueError('You did not specify a path with "%s"' % save_path)
-            if os.path.exists(os.path.join(save_path_base, model_file_name)):
-                raise ValueError('Path "%s" already exists' % save_path_base)
-
-            if not os.path.exists(save_path_base):
-                os.makedirs(save_path_base)
+        save_path_base, model_file_name = save_paths_obtain_and_check(self)
 
         # Add current absolute path to system path
         # This is required for local modules to load.
-        add_path = os.path.abspath('.')
-        sys.path.append(add_path)
-        self.info('Added %s to path' % add_path)
+        add_local_path_to_system(self.info)
 
         """
         Optional (local) module to load.
         There several functionalities can be bundled at one place.
         """
         modules_option = self.option('modules')
-        loaded_modules = []
-        if modules_option:
-            for module_option in modules_option:
-                possible_module_file_name = module_option + '.py' if not module_option.endswith('.py') else module_option
-                if os.path.exists(possible_module_file_name):
-                    module_file_name = possible_module_file_name
-                    module_name = module_file_name.replace('.py', '')
-
-                    try:
-                        loaded_modules.append(__import__('.' + module_name, fromlist=['']))
-                    except ModuleNotFoundError:
-                        raise ModuleNotFoundError('Could not import "%s"' % module_name)
+        loaded_modules = load_modules(modules_option)
         self.info('Loaded modules: %s' % loaded_modules)
 
 
@@ -87,23 +64,17 @@ class InitCommand(Command):
             'save_path_base': save_path_base,
             'model_persistence_name': model_file_name,  # If later set to None/empty, model will not be persisted
         }
+        # TODO metadata will replace config in future releases
+        metadata = pkmd.init_metadata()
+        metadata.system_loaded_modules = loaded_modules
 
         # Load user-defined configuration
         if self.option('config'):
             for config_option in self.option('config'):
                 config_option = str(config_option)
-                if os.path.exists(config_option):
-                    self.info('Loading configuration from "%s"' % config_option)
-                    with open(config_option, 'r') as handle:
-                        user_config = json.load(handle)
-                else:
-                    try:
-                        user_config = json.loads(config_option)
-                    except TypeError:
-                        raise ValueError('Invalid JSON as config passed.')
-                assert type(user_config) is dict, 'User config must be a dictionary.'
-
+                user_config = load_custom_config(config_option)
                 config.update(user_config)
+                load_into_property_object(metadata, user_config, 'arguments_')
 
         """ ---------------------------
         Dynamic configuration computations.

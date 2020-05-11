@@ -9,13 +9,16 @@ import torch
 import numpy as np
 import ignite
 
+import pyklopp.metadata as pkmd
+
 from tqdm import tqdm
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import create_supervised_trainer, create_supervised_evaluator, Events
 from cleo import Command
 
 from pyklopp import __version__, subpackage_import
-from pyklopp.util import load_modules, load_dataset_from_argument
+from pyklopp.util import load_dataset_from_argument, save_paths_obtain_and_check, load_custom_config
+from pyklopp.loading import load_modules, add_local_path_to_system
 
 
 class TrainCommand(Command):
@@ -32,15 +35,7 @@ class TrainCommand(Command):
 
     def handle(self):
         # Early check for save path
-        save_path_base = None
-        model_file_name = None
-        if self.option('save'):
-            save_path = str(self.option('save'))
-            if os.path.exists(save_path):
-                raise ValueError('Path to save model to "%s" already exists' % save_path)
-
-            model_file_name = os.path.basename(save_path)
-            save_path_base = os.path.dirname(save_path)
+        save_path_base, model_file_name = save_paths_obtain_and_check(self)
 
         # Model file path (a persisted .pth pytorch model)
         model_root_path = self.argument('model')
@@ -49,9 +44,7 @@ class TrainCommand(Command):
 
         # Add current absolute path to system path to load local modules
         # If initialized a module previously from a local module, then it must be available in path later again
-        add_path = os.path.abspath('.')
-        sys.path.append(add_path)
-        self.info('Added %s to path' % add_path)
+        add_local_path_to_system(self.info)
 
         """
         Optional (local) module to load.
@@ -99,22 +92,15 @@ class TrainCommand(Command):
             'get_loss': 'pyklopp.defaults.get_loss',
             'get_dataset_test': None,
         }
+        # TODO metadata will replace config in future releases
+        metadata = pkmd.init_metadata()
+        metadata.system_loaded_modules = loaded_modules
 
         # Load user-defined configuration
         if self.option('config'):
             for config_option in self.option('config'):
                 config_option = str(config_option)
-                if os.path.exists(config_option):
-                    self.info('Loading configuration from "%s"' % config_option)
-                    with open(config_option, 'r') as handle:
-                        user_config = json.load(handle)
-                else:
-                    try:
-                        user_config = json.loads(config_option)
-                    except TypeError:
-                        raise ValueError('Invalid JSON as config passed.')
-                assert type(user_config) is dict, 'User config must be a dictionary.'
-
+                user_config = load_custom_config(config_option)
                 config.update(user_config)
 
         # Dynamic configuration computations.
