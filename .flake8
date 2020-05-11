@@ -15,4 +15,4 @@ exclude =
     .pytest_cache
     .vscode
     .github
-    res/
+    res
