@@ -2,8 +2,9 @@
 
 # Development Version
 
-## 0.4
+## 0.3.1
 * introduced pre-commit hooks and added linting
+* added persistence to evaluation command; storing evaluation with --save='test/' in the specified config file
 
 ## 0.3
 **Important:**
