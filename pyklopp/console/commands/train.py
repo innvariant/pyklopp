@@ -163,7 +163,7 @@ class TrainCommand(Command):
             num_workers=2,
         )
         dataiter = iter(train_loader)
-        initial_features, initial_labels = dataiter.next()
+        next(dataiter)
         config["time_dataset_loading_end"] = time.time()
 
         # Determine device to use (e.g. cpu, gpu:0, gpu:1, ..)

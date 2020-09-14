@@ -205,6 +205,33 @@ class EvalCommand(Command):
                 evaluation_state.metrics[metric_name]
             )
 
+        """
+        Optional configuration persistence.
+        """
+        if save_path_base is not None:
+            config_file_name = config["config_persistence_name"]
+            config_file_path = os.path.join(save_path_base, config_file_name)
+
+            full_config = {}
+            if os.path.exists(config_file_path):
+                # Load possible existing config
+                with open(config_file_path, "r") as handle:
+                    full_config = json.load(handle)
+
+            config_key = config["config_key"]
+            # Add config in a list of the dict, e.g. { 'evaluation': [{previous_config}, {..}] }
+            if (
+                config_key not in full_config
+                or type(full_config[config_key]) is not list
+            ):
+                # Make sure, the config-key is a list, e.g. "{ 'evaluation': {xyz} }" -> "{ 'evaluation': [{xyz}] }"
+                full_config[config_key] = [full_config[config_key]]
+            full_config[config_key].append(config)
+
+            self.info('Writing configuration to "%s"' % config_file_path)
+            with open(config_file_path, "w") as handle:
+                json.dump(full_config, handle, indent=2, sort_keys=True)
+
         self.info("Final configuration:")
         self.info(json.dumps(config, indent=2, sort_keys=True))
         self.info("Done.")

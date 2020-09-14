@@ -138,3 +138,6 @@ Execute job *tests*: ``gitlab-runner exec docker test-python3.6``
 ## Running github action locally
 Install *https://github.com/nektos/act*.
 Run ``act``
+
+## Running pre-commit checks locally
+``poetry run pre-commit run --all-files``
