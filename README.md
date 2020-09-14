@@ -1,4 +1,4 @@
-# pyklopp ![Tests](https://github.com/innvariant/pyklopp/workflows/Tests/badge.svg)
+# pyklopp [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity) [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/) [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/) [![Python 3.6](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/) ![Tests](https://github.com/innvariant/pyklopp/workflows/Tests/badge.svg)
 Tired of logging all hyperparameter configurations of your model prototyping to disk?
 
 Pyklopp is a tool to initialize, train and evaluate pytorch models (currently for supervised problems).
@@ -138,3 +138,6 @@ Execute job *tests*: ``gitlab-runner exec docker test-python3.6``
 ## Running github action locally
 Install *https://github.com/nektos/act*.
 Run ``act``
+
+## Running pre-commit checks locally
+``poetry run pre-commit run --all-files``
