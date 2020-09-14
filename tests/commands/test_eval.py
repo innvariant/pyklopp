@@ -108,7 +108,8 @@ def get_dataset(**args):
         + " "
         + dataset_module
         + ".get_dataset"
-        + " --save=" + save_path_eval
+        + " --save="
+        + save_path_eval
         + " --config {json_config}".format(
             json_config=shlex.quote(json.dumps(user_config))
         )
