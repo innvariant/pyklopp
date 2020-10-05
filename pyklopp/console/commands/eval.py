@@ -220,12 +220,9 @@ class EvalCommand(Command):
 
             config_key = config["config_key"]
             # Add config in a list of the dict, e.g. { 'evaluation': [{previous_config}, {..}] }
-            if (
-                config_key not in full_config
-                or type(full_config[config_key]) is not list
-            ):
+            if config_key not in full_config:
                 # Make sure, the config-key is a list, e.g. "{ 'evaluation': {xyz} }" -> "{ 'evaluation': [{xyz}] }"
-                full_config[config_key] = [full_config[config_key]]
+                full_config[config_key] = []
             full_config[config_key].append(config)
 
             self.info('Writing configuration to "%s"' % config_file_path)
