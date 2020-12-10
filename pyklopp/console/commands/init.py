@@ -147,7 +147,9 @@ class InitCommand(Command):
                 fn_get_model = mod
         else:
             try:
-                fn_get_model = subpackage_import(get_model)
+                #fn_get_model = subpackage_import(get_model)
+                modules_get_model = load_modules([get_model])
+                fn_get_model = modules_get_model[0].get_model
             except ModuleNotFoundError as e:
                 raise ValueError(
                     "Could not find module <%s> via subpackage import.".format(

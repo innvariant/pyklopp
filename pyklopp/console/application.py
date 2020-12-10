@@ -5,6 +5,7 @@ from pyklopp import __version__
 from .commands.eval import EvalCommand
 from .commands.init import InitCommand
 from .commands.train import TrainCommand
+from .commands.pack import PackCommand
 
 
 class Application(BaseApplication):
@@ -15,6 +16,6 @@ class Application(BaseApplication):
             self.add(command)
 
     def get_default_commands(self):  # type: () -> list
-        commands = [InitCommand(), TrainCommand(), EvalCommand()]
+        commands = [InitCommand(), TrainCommand(), EvalCommand(), PackCommand()]
 
         return commands
