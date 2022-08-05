@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import pytest
 
@@ -39,6 +40,8 @@ def test_load_modules():
 def test_load_modules_subfolder():
     # Arrange
     folder = "submod"
+    if os.path.exists(folder):
+        shutil.rmtree(folder)
     os.makedirs(folder)
     module_name = "my_module"
     module_full = folder + "." + module_name
