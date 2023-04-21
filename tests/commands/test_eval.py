@@ -3,8 +3,8 @@ import os
 import shlex
 import shutil
 
-from cleo import Application
-from cleo import CommandTester
+from cleo.application import Application
+from cleo.testers.command_tester import CommandTester
 
 from pyklopp.console.commands.eval import EvalCommand
 from pyklopp.console.commands.init import InitCommand

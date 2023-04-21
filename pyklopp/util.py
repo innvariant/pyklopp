@@ -4,10 +4,9 @@ import socket
 import time
 import uuid
 import warnings
-
-import cleo
 import torch
 
+from cleo.commands.command import Command
 from pyklopp import __version__
 from pyklopp import subpackage_import
 from pyklopp.loading import add_local_path_to_system
@@ -136,7 +135,7 @@ def load_dataset_from_argument(
     return dataset
 
 
-def save_paths_obtain_and_check(command: cleo.Command) -> (str, str):
+def save_paths_obtain_and_check(command: Command) -> (str, str):
     # Early check for save path
     save_path_base = None
     model_file_name = None
@@ -158,7 +157,7 @@ def save_paths_obtain_and_check(command: cleo.Command) -> (str, str):
     return save_path_base, model_file_name
 
 
-def build_default_config(command: cleo.Command, base_config: dict = None):
+def build_default_config(command: Command, base_config: dict = None):
     if base_config is None:
         base_config = {}
     config = base_config.copy()
@@ -183,8 +182,8 @@ def build_default_config(command: cleo.Command, base_config: dict = None):
         }
     )
 
-    all_options = command.option()
-    all_arguments = command.argument()
+    all_options = command.options
+    all_arguments = command.arguments
     for prefix_name, keywords in zip(
         ["option", "argument"], [all_options, all_arguments]
     ):

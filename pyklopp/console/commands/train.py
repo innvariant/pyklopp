@@ -9,7 +9,8 @@ import ignite
 import numpy as np
 import torch
 
-from cleo import Command
+from cleo.commands.command import Command
+from cleo.helpers import argument, option
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Events
 from ignite.engine import create_supervised_evaluator
@@ -27,16 +28,40 @@ from pyklopp.util import save_paths_obtain_and_check
 
 
 class TrainCommand(Command):
-    """
-    Trains a model
-
-    train
-        {model : Path to the pytorch model file}
-        {dataset : Data set module for training}
-        {--m|modules=* : Optional module file to load.}
-        {--c|config=* : Configuration JSON string or file path.}
-        {--s|save= : Path (including name) to save the model to}
-    """
+    name = "train"
+    description = "Trains a model"
+    arguments = [
+        argument(
+            "model",
+            description="Path to the pytorch model file"
+        ),
+        argument(
+            "dataset",
+            description="Data set module for training"
+        )
+    ]
+    options = [
+        option(
+            "modules",
+            "m",
+            description="Optional modules to load.",
+            flag=False,
+            multiple=True
+        ),
+        option(
+            "config",
+            "c",
+            description="JSON config or path to JSON config file.",
+            flag=False,
+            multiple=True
+        ),
+        option(
+            "save",
+            "s",
+            description="Path to save the model to",
+            flag=False
+        )
+    ]
 
     def handle(self):
         # Early check for save path

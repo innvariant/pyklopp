@@ -9,7 +9,8 @@ import ignite
 import numpy as np
 import torch
 
-from cleo import Command
+from cleo.commands.command import Command
+from cleo.helpers import argument, option
 from ignite.engine import create_supervised_evaluator
 
 from pyklopp import __version__
@@ -20,16 +21,40 @@ from pyklopp.util import load_dataset_from_argument
 
 
 class EvalCommand(Command):
-    """
-    Evaluates a pre-trained model on a given test data set.
-
-    eval
-        {model : Path to the pytorch model file}
-        {testset : Function to retrieve the test set based on the assembled configuration}
-        {--m|modules=* : Optional module file to load.}
-        {--c|config=* : Configuration JSON string or file path.}
-        {--s|save= : Path (including optional name) to save the configuration to, e.g. sub/path/config.json}
-    """
+    name = "eval"
+    description = "Evaluates a pre-trained model on a given test data set."
+    arguments = [
+        argument(
+            "model",
+            description="Path to the pytorch model file"
+        ),
+        argument(
+            "testset",
+            description="Function to retrieve the test set based on the assembled configuration"
+        )
+    ]
+    options = [
+        option(
+            "modules",
+            "m",
+            description="Optional modules to load.",
+            flag=False,
+            multiple=True
+        ),
+        option(
+            "config",
+            "c",
+            description="Configuration JSON string or file path.",
+            flag=False,
+            multiple=True
+        ),
+        option(
+            "save",
+            "s",
+            description="Path (including optional name) to save the configuration to, e.g. sub/path/config.json",
+            flag=False
+        )
+    ]
 
     def handle(self):
         """
@@ -140,7 +165,7 @@ class EvalCommand(Command):
             num_workers=2,
         )
         dataiter = iter(dataset_loader)
-        dataiter.next()  # load at least one item to invoke having it into memory
+        next(dataiter)  # load at least one item to invoke having it into memory
         config["time_dataset_loading_end"] = time.time()
 
         # Determine device to use (e.g. cpu, gpu:0, gpu:1, ..)
@@ -201,7 +226,7 @@ class EvalCommand(Command):
         config["time_model_evaluation_end"] = time.time()
 
         for metric_name in evaluation_metrics:
-            config["evaluation_%s" % metric_name] = np.float(
+            config["evaluation_%s" % metric_name] = float(
                 evaluation_state.metrics[metric_name]
             )
 

@@ -8,7 +8,8 @@ import uuid
 import numpy as np
 import torch.nn
 
-from cleo import Command
+from cleo.commands.command import Command
+from cleo.helpers import argument, option
 
 import pyklopp.metadata as pkmd
 
@@ -23,16 +24,41 @@ from pyklopp.util import save_paths_obtain_and_check
 
 
 class InitCommand(Command):
-    """
-    Initializes a model from a given module
-
-    init
-        {model : Name of the module with initialization method for the model.}
-        {--m|modules=* : Optional modules to load.}
-        {--c|config=* : JSON config or path to JSON config file.}
-        {--s|save= : Path to save the model to}
-        {--meta= : Path to save the meta information to}
-    """
+    name = "init"
+    description = "Initializes a model from a given module"
+    arguments = [
+        argument(
+            "model",
+            description="Name of the module with initialization method for the model."
+        )
+    ]
+    options = [
+        option(
+            "modules",
+            "m",
+            description="Optional modules to load.",
+            flag=False,
+            multiple=True
+        ),
+        option(
+            "config",
+            "c",
+            description="JSON config or path to JSON config file.",
+            flag=False,
+            multiple=True
+        ),
+        option(
+            "save",
+            "s",
+            description="Path to save the model to",
+            flag=False
+        ),
+        option(
+            "meta",
+            description="Path to save the meta information to",
+            flag=False
+        )
+    ]
 
     def handle(self):
         # Early check for save path
