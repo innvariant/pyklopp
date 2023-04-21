@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyklopp"
-version = "0.3.2"
+version = "0.4.0-dev"
 description = ""
 authors = [
     "Julian Stier <julian.stier@uni-passau.de>"
