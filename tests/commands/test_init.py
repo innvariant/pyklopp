@@ -106,8 +106,7 @@ def test_success_init_simple_model():
         shutil.rmtree(os.path.dirname(save_path))
 
     # write model to file path from which we want to import from
-    content = """
-import torch
+    content = """import torch
 
 def get_model(**args):
     return torch.nn.Conv2d(10, 10, 10)
@@ -125,6 +124,52 @@ def get_model(**args):
 
     # Cleanup
     os.remove(module_file_path)
+    shutil.rmtree(os.path.dirname(save_path))
+
+
+def test_success_init_submodule():
+    # Arrange
+    # set up application with command
+    application = Application()
+    application.add(InitCommand())
+
+    # set up file path variables
+    subfolder = "sub"
+    module_name = "bar"
+    module_full = subfolder + "." + module_name
+    module_file_path = os.path.join(subfolder, module_name + ".py")
+    save_path = "bar-config/model.py"
+
+    # Set up subfolder
+    if not os.path.exists(subfolder):
+        os.makedirs(subfolder)
+
+    # clean up possible existing files
+    if os.path.exists(module_file_path):
+        os.remove(module_file_path)
+    if os.path.exists(save_path):
+        shutil.rmtree(os.path.dirname(save_path))
+
+    # write model to file path from which we want to import from
+    content = """import torch
+
+def get_model(**args):
+    return torch.nn.Conv2d(10, 10, 10)
+
+"""
+    with open(module_file_path, "a") as the_file:
+        the_file.write(content)
+
+    # load command and build tester object to act on
+    command = application.find("init")
+    command_tester = CommandTester(command)
+
+    # Act
+    command_tester.execute(module_full + " --save=" + save_path)
+
+    # Cleanup
+    os.remove(module_file_path)
+    os.removedirs(subfolder)
     shutil.rmtree(os.path.dirname(save_path))
 
 

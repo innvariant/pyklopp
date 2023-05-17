@@ -49,17 +49,19 @@ def load_modules(module_args: list) -> list:
             if not module_option.endswith(".py")
             else module_option
         )
-        if os.path.exists(possible_module_file_name):
-            module_file_name = possible_module_file_name
-            module_name = module_file_name.replace(".py", "")
 
-            try:
-                loaded_modules.append(__import__("." + module_name, fromlist=[""]))
-            except ModuleNotFoundError as e:
-                raise ModuleNotFoundError(
-                    'Could not import "%s". Have you added "." to your system path?'
-                    % module_name,
-                    e,
-                )
+        module_file_name = possible_module_file_name
+        module_name = module_file_name.replace(".py", "")
+
+        module_full = module_name if "." in module_name else "." + module_name
+
+        try:
+            loaded_modules.append(__import__(module_full, fromlist=[""]))
+        except ModuleNotFoundError as e:
+            raise ModuleNotFoundError(
+                'Could not import <%s>. Have you added "." to your system path?'
+                % module_full,
+                e,
+            )
 
     return loaded_modules
